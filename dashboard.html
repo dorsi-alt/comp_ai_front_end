@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard — Companion AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Minimal helpers layered on your theme */
+    .page-hero { padding: 8rem 0 3rem; text-align: center; }
+    .page-title { font-size: clamp(32px, 4vw, 56px); line-height: 1.1; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .stack { display: grid; gap: 12px; }
+    .bots-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .bot-card { display: block; padding: 16px; border-radius: 16px; text-decoration: none; }
+    .bot-title { font-weight: 700; font-size: 1.05rem; margin: 2px 0 8px; }
+    .bot-sub { opacity: .8; font-size: .9rem; }
+    .empty { opacity: .8; text-align: center; padding: 24px; border: 1px dashed rgba(255,255,255,.15); border-radius: 14px; }
+    .badge { padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); }
+    .ok { color: #22d3ee; } .err { color: #ff7b7b; } .warn { color: #ffd166; }
+  </style>
+</head>
+
+<body class="loaded internal-page">
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="logo-container">
+        <img src="LOGO.png" alt="Logo" class="logo-image">
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li><a id="linkCreateTop" href="create-bot.html" class="glass-card">Create Bot</a><div class="nav-hover-square"></div></li>
+        </ul>
+      </nav>
+      <div class="contact-link">
+        <a href="index.html" class="contact-badge">HOME</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="gradient-reveal"></div>
+
+  <!-- Hero -->
+  <section class="section">
+    <div class="section-content page-hero">
+      <h1 class="page-title">Your <span class="accent-strong">Bots</span></h1>
+      <p class="subtitle">Click a bot to edit it on the create-bot page.</p>
+      <div style="margin-top:10px">
+        <span id="healthStatus" class="badge">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bots list -->
+  <section class="section">
+    <div class="section-content">
+      <div class="grid">
+        <div class="glass-card" style="grid-column: 1/-1;">
+          <h3>🤖 Bots</h3>
+          <div id="botList" class="bots-grid">
+            <div class="empty">Loading…</div>
+          </div>
+          <div class="stack" style="margin-top:12px">
+            <a id="linkCreateNew" class="contact-badge" href="create-bot.html">Create New Bot</a>
+            <small class="mono">Data source: <code id="sourceHint"></code></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (unchanged) -->
+  <footer class="site-footer">
+    <div class="footer-content-section">
+      <div class="footer-content">
+        <div class="footer-left">
+          <p>xxx xxxxxxxx</p><p>xx xxxxx</p><p>xxxxx xx xxxx</p><p>xxxxxxxxx</p><p>xxxxxxx xxxxx</p><p>xxx xxxxxxx</p>
+        </div>
+        <div class="footer-right">
+          <p>xxxxxxxxxx xxxxx xxxxxxx</p><p>xxxxxxxx xxxxxxxx</p><p>xxxxxxxxxxxxx xxxxxxx</p><p>xxxx xxxxxxxxx xxxxxx</p><p>xx xxxxx xxx xxxxxxxxxxxx</p><p>xxxxx xxxxxxx xxxxxxx xxx</p>
+        </div>
+      </div>
+      <div class="footer-credits">
+        <p>xxxxx xxxxxx & xxxxx xx <a href="https://open.spotify.com/artist/6YXgRMajnjib8j6Cxzcryp?si=iiLnt59BRp6QgKGizkG5Zg" target="_blank">@xxxxxxxx</a></p>
+      </div>
+    </div>
+    <div class="footer-svg-section">
+      <img class="footer-svg" src="C.png" alt="">
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    // ---------- State (reads from URL ?username=&base= or localStorage) ----------
+    const params = new URLSearchParams(location.search);
+    const saved = JSON.parse(localStorage.getItem("tbp.defaults") || "{}");
+
+    const state = {
+      baseUrl: (params.get("base") || saved.baseUrl || "http://localhost:8000").replace(/\/$/, ""),
+      username: params.get("username") || saved.username || "",
+    };
+
+    // Hint where values came from
+    $("sourceHint").textContent = params.get("base") || params.get("username") ? "query params" : (saved.baseUrl || saved.username ? "localStorage" : "defaults");
+
+    // Keep "Create New Bot" + top nav link carrying username & base forward
+    function updateCreateLinks() {
+      const q = new URLSearchParams();
+      if (state.username) q.set("username", state.username);
+      if (state.baseUrl) q.set("base", state.baseUrl);
+      const suffix = q.toString() ? "?" + q.toString() : "";
+      $("linkCreateNew").href = "create-bot.html" + suffix;
+      $("linkCreateTop").href = "create-bot.html" + suffix;
+    }
+    updateCreateLinks();
+
+    // ---------- HTTP helpers ----------
+    async function parseMaybeJson(res) {
+      try { return await res.json(); } catch { return { raw: await res.text().catch(() => "") }; }
+    }
+    async function apiGet(path) {
+      const res = await fetch(`${state.baseUrl}${path}`, { headers: { "Accept": "application/json" } });
+      const data = await parseMaybeJson(res);
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    // ---------- UI helpers ----------
+    function setHealth(text, cls) {
+      const el = $("healthStatus");
+      el.textContent = text;
+      el.className = `badge ${cls || ""}`;
+    }
+
+    function renderBots(list) {
+      const wrap = $("botList");
+      wrap.innerHTML = "";
+
+      if (!Array.isArray(list) || list.length === 0) {
+        wrap.innerHTML = `<div class="empty">No bots found for <span class="mono">${state.username || "(no username)"}</span>.</div>`;
+        return;
+      }
+
+      // Accept either ["name", ...] or [{bot_name:"name", ...}]
+      const items = list.map(b => (typeof b === "string" ? { bot_name: b } : b));
+
+      for (const bot of items) {
+        const name = bot.bot_name || bot.name || "(unnamed)";
+        const q = new URLSearchParams({ username: state.username, bot_name: name, base: state.baseUrl });
+        const href = `bot-management.html?${q.toString()}`;
+        const card = document.createElement("a");
+        card.className = "glass-card bot-card";
+        card.href = href;
+        card.innerHTML = `
+          <div class="bot-title">${name}</div>
+          <div class="bot-sub">
+            <span class="mono">/users/${state.username}/bots/${name}</span>
+          </div>
+        `;
+        wrap.appendChild(card);
+      }
+    }
+
+    // ---------- Page load: GET /users/{username}/bots ----------
+    async function listBotsOnLoad() {
+      if (!state.baseUrl) { setHealth("no base url", "warn"); $("botList").innerHTML = `<div class="empty">Missing base URL.</div>`; return; }
+      if (!state.username) { setHealth("username?", "warn"); $("botList").innerHTML = `<div class="empty">Add a username via <span class="mono">?username=…</span> or save it in <span class="mono">localStorage["tbp.defaults"]</span> from the create-bot page.</div>`; return; }
+
+      try {
+        setHealth("loading…");
+        const r = await apiGet(`/users/${encodeURIComponent(state.username)}/bots`);
+        setHealth(r.ok ? "ok" : `err ${r.status}`, r.ok ? "ok" : "err");
+        // supports {bots:[...]} or [...]
+        renderBots(r.data?.bots || r.data || []);
+      } catch (e) {
+        setHealth("error", "err");
+        $("botList").innerHTML = `<div class="empty">Failed to load bots.<br/><span class="mono">${String(e)}</span></div>`;
+      }
+    }
+
+    // Kick off the fetch as soon as this page (the dashboard) loads
+    document.addEventListener("DOMContentLoaded", listBotsOnLoad);
+  </script>
+</body>
+</html>

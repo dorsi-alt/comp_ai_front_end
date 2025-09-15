@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMPANION AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="LOGO.png" alt="Logo" class="logo-image">
+            </div>
+
+            <nav class="main-nav">
+                <ul>
+                    <li>
+                        <a href="#how-it-works" class="active glass-card"><span class="nav-icon" aria-label="Future"
+                                title="Future">★</span> How it works</a>
+                        <div class="nav-hover-square"></div>
+                    </li>
+                    <li>
+                        <a href="#" class="glass-card"><span class="nav-icon" aria-label="Future"
+                                title="Future">★</span> Future</a>
+                        <div class="nav-hover-square"></div>
+                    </li>
+                    <li>
+                        <a href="#about" class="glass-card">ABOUT</a>
+                        <div class="nav-hover-square"></div>
+                    </li>
+                    <li>
+                        <a href="#" id="soundToggle" class="glass-card">SOUND</a>
+                        <div class="nav-hover-square"></div>
+                    </li>
+                    <li>
+                        <a href="dashboard.html" class="glass-card">DASHBOARD</a>
+                        <div class="nav-hover-square"></div>
+                    </li>
+                    <li>
+                        <a href="create-bot.html" class="glass-card">CREATE BOT</a>
+                        <div class="nav-hover-square"></div>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="contact-link">
+                <button type="button" class="contact-badge">CONNECT WALLET</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="gradient-reveal"></div>
+
+    <div class="audio-enable">
+        <img src="LOGO.png" alt="Logo" class="intro-logo">
+        <p>Companion AI</p>
+        <button class="enable-button" id="enableBtn">START</button>
+    </div>
+
+    <div class="preloader" id="preloader">
+        <span id="counter">[000]</span>
+    </div>
+
+    <div class="geometric-background">
+        <svg class="geometric-svg" viewBox="0 0 1920 1080">
+            <g id="grid-lines"></g>
+            <g id="circles-outline"></g>
+            <g id="circles-filled">
+                <clipPath id="right-half">
+                    <rect x="960" y="0" width="960" height="1080" />
+                </clipPath>
+                <g clip-path="url(#right-half)"></g>
+            </g>
+
+            <text class="geometric-text" x="100" y="100">THE CREATIVE</text>
+            <text class="geometric-text" x="100" y="115">PROCESS</text>
+
+            <text class="geometric-text" x="1720" y="100">THE ESSENCE</text>
+            <text class="geometric-text" x="1720" y="115">OF SOUND</text>
+
+            <text class="geometric-text" x="100" y="980" id="debugLine1">AWARENESS: SILENCE</text>
+            <text class="geometric-text" x="100" y="995" id="debugLine2">STATE: VOID</text>
+            <text class="geometric-text" x="100" y="1010" id="debugLine3">ENERGY: DORMANT</text>
+            <text class="geometric-text" x="100" y="1025" id="debugLine4">PRESENCE: SOLID</text>
+
+            <text class="geometric-text" x="1620" y="980">BETWEEN THE</text>
+            <text class="geometric-text" x="1620" y="995">HEARTBEATS</text>
+        </svg>
+    </div>
+
+    <audio id="startClickSound" preload="auto">
+        <source src="https://assets.codepen.io/7558/preloader-2s-001.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="preloaderSound" preload="auto">
+        <source src="https://assets.codepen.io/7558/preloader-5s-001.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="scrollSound1" loop preload="auto">
+        <source src="https://assets.codepen.io/7558/glitch-fx-001.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="scrollSound2" loop preload="auto">
+        <source src="https://assets.codepen.io/7558/glitch-fx-001.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="scrollSound3" loop preload="auto">
+        <source src="https://assets.codepen.io/7558/glitch-fx-001.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="hoverSound" preload="auto">
+        <source src="https://assets.codepen.io/7558/preloader-2s-001.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="backgroundMusic" loop preload="auto">
+        <source src="https://assets.codepen.io/7558/lxstnght-night-angel.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="center-circle">
+        <div class="circle-container">
+            <div class="glowing-circle" id="glowCircle"></div>
+        </div>
+    </div>
+
+    <section class="section section-1" id="how-it-works">
+        <div class="section-content">
+            <div class="hero">
+                <div class="hero-left">
+                    <h1 class="hero-title">
+                        CREATE <span class="accent">YOUR</span> SOCIAL<br />
+                        AGENT WITH <span class="accent-strong">COMPANION AI</span>
+                    </h1>
+                </div>
+                <div class="hero-right">
+                    <p>Your second self navigating the digital world with intelligence</p>
+                    <p>Authentic interactions powered by advanced AI technology</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-2" id="about">
+        <div class="section-content">
+            <div class="about">
+                <h2 class="about-title">About the project</h2>
+                <div class="about-grid">
+                    <div class="about-card">
+                        Create your authentic digital persona through advanced AI personality mapping. Provide your
+                        digital footprint and let our sophisticated algorithms analyze your communication patterns,
+                        personality traits, and behavioral preferences to construct your second self.
+                    </div>
+                    <div class="about-card">
+                        Your AI persona employs deep learning to authentically replicate your unique voice and thinking
+                        patterns. We analyze your writing style, emotional expressions, decision-making patterns, and
+                        social interactions to create a digital twin that truly represents who you are.
+                    </div>
+                    <div class="about-card">
+                        Deploy your second self across multiple platforms and watch it engage authentically on your
+                        behalf. With intelligent conversation management, contextual awareness, and genuine personality
+                        expression, your AI maintains meaningful connections 24/7 while you focus on what matters most.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-3">
+        <div class="section-content">
+            <div class="steps">
+                <div class="steps-left">
+                    <div class="steps-title">
+                        <span class="line"><span class="accent-strong">HOW</span> TO DEPLOY</span>
+                        <span class="line">YOUR OWN AGENT USING</span>
+                        <span class="line">COMPANION AI</span>
+                    </div>
+                    <div class="steps-text">
+                        <p>Go to the Companion AI platform and connect your wallet.</p>
+                        <p>Create your own second self by providing:</p>
+                        <ul class="steps-list">
+                            <li>Your digital persona name</li>
+                            <li>Personality traits</li>
+                            <li>Communication style</li>
+                            <li>Social media history</li>
+                            <li>Content preferences</li>
+                        </ul>
+                        <p>Your second self comes to LIFE.</p>
+                        <p>Your digital persona continues to dynamically grow and learn alongside your brand.</p>
+                        <p>Evolve by creating new personas and expanding your social presence.</p>
+                    </div>
+                </div>
+                <div class="steps-right">
+                    <div class="read-progress" id="readProgress">
+                        <div class="read-thumb" id="readThumb"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-content-section">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>xxx xxxxxxxx</p>
+                    <p>xx xxxxx</p>
+                    <p>xxxxx xx xxxx</p>
+                    <p>xxxxxxxxx</p>
+                    <p>xxxxxxx xxxxx</p>
+                    <p>xxx xxxxxxx</p>
+                </div>
+                <div class="footer-right">
+                    <p>xxxxxxxxxx xxxxx xxxxxxx</p>
+                    <p>xxxxxxxx xxxxxxxx</p>
+                    <p>xxxxxxxxxxxxx xxxxxxx</p>
+                    <p>xxxx xxxxxxxxx xxxxxx</p>
+                    <p>xx xxxxx xxx xxxxxxxxxxxx</p>
+                    <p>xxxxx xxxxxxx xxxxxxx xxx</p>
+                </div>
+            </div>
+            <div class="footer-credits">
+                <p>xxxxx xxxxxx & xxxxx xx <a
+                        href="https://open.spotify.com/artist/6YXgRMajnjib8j6Cxzcryp?si=iiLnt59BRp6QgKGizkG5Zg"
+                        target="_blank">@xxxxxxxx</a></p>
+            </div>
+        </div>
+        <div class="footer-svg-section">
+            <img class="footer-svg" src="C.png" alt="">
+        </div>
+    </footer>
+
+    <!-- Wallet Address Modal -->
+    <div class="auth-modal" id="walletModal" style="display:none;">
+        <div class="auth-card">
+            <h2 class="auth-title">Connect Wallet</h2>
+            <p class="auth-subtitle">Enter your wallet address to create or access your account.</p>
+            <form id="walletForm" class="auth-form">
+                <div class="form-group">
+                    <label for="walletInput">WALLET ADDRESS</label>
+                    <input type="text" id="walletInput" placeholder="0x..." required autocomplete="off">
+                </div>
+                <button type="submit" id="walletSubmit" class="contact-badge auth-button">
+                    <span class="btn-text">Continue</span>
+                    <div class="loader hidden"></div>
+                </button>
+            </form>
+            <div id="walletFeedback" class="feedback-area"></div>
+            <button type="button" id="walletClose" class="btn-secondary modal-close">Close</button>
+        </div>
+    </div>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.37/dist/lenis.min.js"></script>
+    <script src="script.js"></script>
+
+
+    <!-- wallet-integration.js -->
+<script>
+(() => {
+  const DEFAULT_BASE_URL = "http://localhost:8000";
+  const LS_KEY = "tbp.defaults";
+
+  const $ = (sel) => document.querySelector(sel);
+  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
+
+  function saveDefaults({ baseUrl, username, botName }) {
+    const prev = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+    const next = {
+      ...prev,
+      baseUrl: (baseUrl || prev.baseUrl || DEFAULT_BASE_URL).replace(/\/$/, ""),
+      username: username || prev.username || "",
+      botName: botName || prev.botName || "",
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(next));
+    return next;
+  }
+
+  // Comprehensive wallet address validation
+  function validateWalletAddress(address) {
+    if (!address || typeof address !== 'string') {
+      return { isValid: false, error: 'Please enter a wallet address.' };
+    }
+
+    const trimmed = address.trim();
+    if (!trimmed) {
+      return { isValid: false, error: 'Please enter a wallet address.' };
+    }
+
+    // Ethereum (0x + 40 hex chars)
+    const ethRegex = /^0x[a-fA-F0-9]{40}$/;
+    if (ethRegex.test(trimmed)) {
+      return { isValid: true, network: 'Ethereum', address: trimmed };
+    }
+
+    // Bitcoin Legacy (1 + 25-34 base58 chars)
+    const btcLegacyRegex = /^[1][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+    if (btcLegacyRegex.test(trimmed)) {
+      return { isValid: true, network: 'Bitcoin (Legacy)', address: trimmed };
+    }
+
+    // Bitcoin SegWit (3 + base58 chars)
+    const btcSegwitRegex = /^[3][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+    if (btcSegwitRegex.test(trimmed)) {
+      return { isValid: true, network: 'Bitcoin (SegWit)', address: trimmed };
+    }
+
+    // Bitcoin Bech32 (bc1 + base32 chars)
+    const btcBech32Regex = /^bc1[a-z0-9]{39,59}$/;
+    if (btcBech32Regex.test(trimmed)) {
+      return { isValid: true, network: 'Bitcoin (Bech32)', address: trimmed };
+    }
+
+    // Solana (base58, 32-44 chars)
+    const solanaRegex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+    if (solanaRegex.test(trimmed) && trimmed.length >= 32 && trimmed.length <= 44) {
+      // Additional check to avoid false positives
+      if (!trimmed.match(/^[13bc1]/)) { // Not Bitcoin format
+        return { isValid: true, network: 'Solana', address: trimmed };
+      }
+    }
+
+    // Litecoin (L or M + base58)
+    const ltcRegex = /^[LM][a-km-zA-HJ-NP-Z1-9]{26,33}$/;
+    if (ltcRegex.test(trimmed)) {
+      return { isValid: true, network: 'Litecoin', address: trimmed };
+    }
+
+    // Dogecoin (D + base58)
+    const dogeRegex = /^D{1}[5-9A-HJ-NP-U]{1}[1-9A-HJ-NP-Za-km-z]{32}$/;
+    if (dogeRegex.test(trimmed)) {
+      return { isValid: true, network: 'Dogecoin', address: trimmed };
+    }
+
+    // Cardano (addr1 + bech32)
+    const adaRegex = /^addr1[a-z0-9]{98,}$/;
+    if (adaRegex.test(trimmed)) {
+      return { isValid: true, network: 'Cardano', address: trimmed };
+    }
+
+    // Polygon (same as Ethereum)
+    if (ethRegex.test(trimmed)) {
+      return { isValid: true, network: 'Polygon/Ethereum', address: trimmed };
+    }
+
+    return { 
+      isValid: false, 
+      error: 'Invalid wallet address format. Please enter a valid wallet address from supported networks (Ethereum, Bitcoin, Solana, etc.).' 
+    };
+  }
+
+  async function apiGet(baseUrl, path) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    try {
+      const res = await fetch(`${baseUrl}${path}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - please check your connection');
+      }
+      throw error;
+    }
+  }
+  
+  async function apiPost(baseUrl, path, body) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    try {
+      const res = await fetch(`${baseUrl}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout - please check your connection');
+      }
+      throw error;
+    }
+  }
+
+  async function ensureUser(baseUrl, username) {
+    try {
+      // 1) health check (optional visual)
+      await apiGet(baseUrl, "/");
+    } catch (err) {
+      return { success: false, error: "Cannot connect to server. Please check your internet connection." };
+    }
+
+    try {
+      // 2) exists?
+      const exists = await apiGet(baseUrl, `/users/${encodeURIComponent(username)}/exists`);
+      if (exists.ok && exists.data && exists.data.exists) {
+        return { success: true, existed: true, message: "Wallet found in database" };
+      }
+    } catch (err) {
+      return { success: false, error: "Failed to check wallet status. Please try again." };
+    }
+
+    try {
+      // 3) create
+      const created = await apiPost(baseUrl, "/users", { username });
+      if (created.ok) {
+        return { success: true, existed: false, message: "New wallet added to database" };
+      }
+      
+      return { success: false, error: created.data?.detail || "Failed to create wallet account" };
+    } catch (err) {
+      return { success: false, error: "Failed to create wallet account. Please try again." };
+    }
+  }
+
+  function showLoading(btn, loading, loadingText = "Checking wallet...") {
+    const loader = btn?.querySelector(".loader");
+    const txt = btn?.querySelector(".btn-text");
+    if (loader) loader.classList.toggle("hidden", !loading);
+    if (txt) txt.textContent = loading ? loadingText : "Continue";
+    if (btn) btn.disabled = !!loading;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const connectBtn = document.querySelector(".contact-badge"); // “CONNECT WALLET” button in header
+    const modal = $("#walletModal");
+    const closeBtn = $("#walletClose");
+    const form = $("#walletForm");
+    const input = $("#walletInput");
+    const submit = $("#walletSubmit");
+    const feedback = $("#walletFeedback");
+
+    // Open modal from header button
+    on(connectBtn, "click", (e) => {
+      e.preventDefault();
+      if (modal) modal.style.display = "block";
+      input?.focus();
+    });
+
+    // Real-time validation as user types
+    let validationTimeout;
+    on(input, "input", () => {
+      clearTimeout(validationTimeout);
+      validationTimeout = setTimeout(() => {
+        const value = (input.value || "").trim();
+        if (value.length < 8) {
+          feedback.innerHTML = "";
+          return;
+        }
+
+        const validation = validateWalletAddress(value);
+        if (validation.isValid) {
+          feedback.innerHTML = `<div class="feedback-message" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e;">✓ Valid ${validation.network} address</div>`;
+        } else if (value.length >= 10) {
+          feedback.innerHTML = `<div class="feedback-message error" style="font-size: 13px;">${validation.error}</div>`;
+        }
+      }, 500); // Debounce validation
+    });
+
+    // Close modal
+    on(closeBtn, "click", () => { if (modal) modal.style.display = "none"; });
+
+    // Submit wallet -> save + ensure API user -> redirect
+    on(form, "submit", async (e) => {
+      e.preventDefault();
+      feedback.innerHTML = "";
+      const raw = (input.value || "").trim();
+
+      // Comprehensive wallet validation
+      const validation = validateWalletAddress(raw);
+      if (!validation.isValid) {
+        feedback.innerHTML = `<div class="feedback-message error">${validation.error}</div>`;
+        return;
+      }
+
+      // Show detected network for user confidence
+      feedback.innerHTML = `<div class="feedback-message" style="background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.3); color: #22d3ee;">✓ Valid ${validation.network} address detected</div>`;
+      
+      const username = validation.address;  // use validated wallet address as API username
+      const baseUrl = DEFAULT_BASE_URL;
+
+      showLoading(submit, true, "Connecting...");
+
+      try {
+        // Persist defaults for the other pages (they auto-read these)
+        saveDefaults({ baseUrl, username });
+
+        // Update loading text to show progress
+        showLoading(submit, true, "Checking wallet...");
+        
+        const result = await ensureUser(baseUrl, username);
+        if (!result.success) {
+          feedback.innerHTML = `<div class="feedback-message error">${result.error}</div>`;
+          showLoading(submit, false);
+          return;
+        }
+
+        // Show success message based on whether wallet existed or was created
+        const statusText = result.existed ? "Welcome back!" : "Account created!";
+        feedback.innerHTML = `<div class="feedback-message" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e;">${statusText} ${result.message}</div>`;
+        
+        // Update button to show success briefly
+        showLoading(submit, true, "Redirecting...");
+        
+        // Redirect after a brief delay to show the message
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1500);
+      } catch (err) {
+        feedback.innerHTML = `<div class="feedback-message error">Connection error. Please check your internet connection and try again.</div>`;
+        console.error("Wallet connection error:", err);
+        showLoading(submit, false);
+      }
+    });
+
+    // Optional: “SOUND” link toggle hook (keeping your existing id)
+    const soundToggle = $("#soundToggle");
+    on(soundToggle, "click", (e) => {
+      e.preventDefault();
+      // no-op: your existing script.js likely manages audio; this is just a placeholder
+      // You can dispatch a custom event here if you need to:
+      document.dispatchEvent(new CustomEvent("sound:toggle"));
+    });
+  });
+})();
+</script>
+
+
+    <script src="wallet-integration.js"></script>
+    
+</body>
+
+</html>

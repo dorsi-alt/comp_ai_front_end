@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bot Management — Companion AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-hero { padding: 8rem 0 2rem; text-align: center; }
+    .page-title { font-size: clamp(28px, 4vw, 52px); line-height: 1.1; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .stack { display: grid; gap: 12px; }
+    .form-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .input, .select, .textarea {
+      width: 100%; padding: 12px 14px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); color: inherit;
+      outline: none;
+    }
+    .textarea { min-height: 140px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    pre.code {
+      background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px; padding: 14px; max-height: 420px; overflow: auto;
+    }
+    .badge { padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); }
+    .ok { color: #22d3ee; } .err { color: #ff7b7b; } .warn { color: #ffd166; }
+    .field { display: grid; gap: 6px; }
+  </style>
+</head>
+<body class="loaded internal-page">
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="logo-container">
+        <img src="LOGO.png" alt="Logo" class="logo-image">
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li><a id="linkDashboard" href="dashboard.html" class="glass-card">Dashboard</a><div class="nav-hover-square"></div></li>
+        </ul>
+      </nav>
+      <div class="contact-link">
+        <a href="index.html" class="contact-badge">HOME</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="gradient-reveal"></div>
+
+  <!-- Hero -->
+  <section class="section">
+    <div class="section-content page-hero">
+      <h1 class="page-title">
+        Manage Bot: <span id="titleBot" class="accent-strong">—</span>
+      </h1>
+      <p class="subtitle">
+        <span class="mono" id="routeHint">/users/—/bots/—</span>
+      </p>
+      <div style="margin-top:10px">
+        <span id="healthStatus" class="badge">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="section">
+    <div class="section-content">
+      <div class="grid">
+        <!-- Twitter Credentials -->
+        <div class="glass-card">
+          <h3>Twitter API Credentials</h3>
+          <div class="stack">
+            <div class="field">
+              <label>API Key</label>
+              <input id="api_key" class="input" type="text" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>API Secret</label>
+              <input id="api_secret" class="input" type="text" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Access Token</label>
+              <input id="access_token" class="input" type="text" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Access Token Secret</label>
+              <input id="access_token_secret" class="input" type="text" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Bearer Token (optional)</label>
+              <input id="bearer_token" class="input" type="text" autocomplete="off" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Persona: Personality -->
+        <div class="glass-card">
+          <h3>Persona — Personality</h3>
+          <div class="form-row">
+            <div class="field"><label>Name</label><input id="p_name" class="input" /></div>
+            <div class="field"><label>Role</label><input id="p_role" class="input" /></div>
+            <div class="field"><label>Tone</label><input id="p_tone" class="input" /></div>
+            <div class="field"><label>Voice</label><input id="p_voice" class="input" /></div>
+          </div>
+        </div>
+
+        <!-- Persona: Communication Style -->
+        <div class="glass-card">
+          <h3>Persona — Communication Style</h3>
+          <div class="form-row">
+            <div class="field"><label>Writing Style</label><input id="cs_style" class="input" /></div>
+            <div class="field"><label>Humor Level</label><input id="cs_humor" class="input" /></div>
+            <div class="field"><label>Emoji Usage</label><input id="cs_emoji" class="input" /></div>
+            <div class="field"><label>Hashtag Strategy</label><input id="cs_hash" class="input" /></div>
+          </div>
+        </div>
+
+        <!-- Persona: Interests & Expertise -->
+        <div class="glass-card">
+          <h3>Persona — Interests & Expertise</h3>
+          <div class="form-row">
+            <div class="field"><label>Primary Focus</label><input id="ie_primary" class="input" /></div>
+            <div class="field"><label>Secondary Interests</label><input id="ie_secondary" class="input" /></div>
+            <div class="field"><label>Buzzwords to Use</label><input id="ie_buzz_use" class="input" /></div>
+            <div class="field"><label>Buzzwords to Avoid</label><input id="ie_buzz_avoid" class="input" /></div>
+          </div>
+        </div>
+
+        <!-- Persona: Content Approach -->
+        <div class="glass-card">
+          <h3>Persona — Content Approach</h3>
+          <div class="form-row">
+            <div class="field"><label>Marketing Style</label><input id="ca_style" class="input" /></div>
+            <div class="field"><label>Call to Action</label><input id="ca_cta" class="input" /></div>
+            <div class="field"><label>Target Audience</label><input id="ca_audience" class="input" /></div>
+            <div class="field"><label>Value Proposition</label><input id="ca_value" class="input" /></div>
+          </div>
+        </div>
+
+        <!-- Persona: Brand Voice Examples -->
+        <div class="glass-card">
+          <h3>Persona — Brand Voice Examples</h3>
+          <div class="form-row">
+            <div class="field"><label>Excitement</label><input id="bv_ex" class="input" /></div>
+            <div class="field"><label>Curiosity</label><input id="bv_cu" class="input" /></div>
+            <div class="field"><label>Authority</label><input id="bv_au" class="input" /></div>
+            <div class="field"><label>Encouragement</label><input id="bv_en" class="input" /></div>
+          </div>
+        </div>
+
+        <!-- Persona: Posting Guidelines -->
+        <div class="glass-card">
+          <h3>Persona — Posting Guidelines</h3>
+          <div class="form-row">
+            <div class="field"><label>Tweet Length</label><input id="pg_length" class="input" /></div>
+            <div class="field"><label>Content Mix</label><input id="pg_mix" class="input" /></div>
+            <div class="field"><label>Response Style</label><input id="pg_response" class="input" /></div>
+            <div class="field"><label>Brand Consistency</label><input id="pg_brand" class="input" /></div>
+          </div>
+        </div>
+
+        <!-- Persona: Custom Instructions -->
+        <div class="glass-card">
+          <h3>Persona — Custom Instructions</h3>
+          <div class="stack">
+            <label>One instruction per line</label>
+            <textarea id="custom_instructions" class="textarea" placeholder="Line 1&#10;Line 2&#10;Line 3"></textarea>
+          </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="glass-card">
+          <h3>Schedule</h3>
+          <div class="form-row">
+            <div>
+              <label>Post Schedule</label>
+              <select id="postSchedule" class="select">
+                <option value="hourly">hourly</option>
+                <option value="daily">daily</option>
+                <option value="weekly">weekly</option>
+              </select>
+            </div>
+            <div>
+              <label>Reply Schedule</label>
+              <select id="replySchedule" class="select">
+                <option value="hourly">hourly</option>
+                <option value="daily">daily</option>
+                <option value="disabled">disabled</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row" style="margin-top:8px">
+            <button id="btnSaveSchedule" class="contact-badge">Save Schedule</button>
+          </div>
+          <small class="mono">PUT /users/&lt;u&gt;/bots/&lt;bot&gt;/schedule</small>
+        </div>
+
+        <!-- Controls -->
+        <div class="glass-card">
+          <h3>Controls</h3>
+          <div class="btn-row">
+            <button id="btnStart" class="contact-badge">Start</button>
+            <button id="btnStop" class="glass-card">Stop</button>
+            <button id="btnPost" class="glass-card">Manual Post</button>
+            <button id="btnReply" class="glass-card">Reply to Mentions</button>
+            <button id="btnRefresh" class="glass-card">Refresh</button>
+          </div>
+          <small class="mono">POST /bots/start · /bots/stop · /bots/post · /bots/reply-to-mentions</small>
+        </div>
+
+        <!-- Save Bot -->
+        <div class="glass-card" style="grid-column:1/-1;">
+          <h3>Save Bot</h3>
+          <p class="subtitle">Saves all sections (credentials + persona + schedule) via <span class="mono">POST /bots</span> after ensuring the user exists.</p>
+          <div class="btn-row">
+            <button id="btnSaveBot" class="contact-badge">Save Bot</button>
+          </div>
+        </div>
+
+        <!-- Output -->
+        <div class="glass-card" style="grid-column:1/-1;">
+          <h3>Output</h3>
+          <pre id="out" class="code mono">{}</pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content-section">
+      <div class="footer-content"><div class="footer-left"><p>&nbsp;</p></div><div class="footer-right"><p>&nbsp;</p></div></div>
+    </div>
+  </footer>
+
+  <script>
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const saved = JSON.parse(localStorage.getItem("tbp.defaults") || "{}");
+
+  // --- Where we get identity/context from ---
+  const API_BASE_URL = "https://compaibackend-production.up.railway.app";
+
+  const state = {
+    username: params.get("username") || saved.username || "",
+    botName: params.get("bot_name") || "",
+    botExists: false,
+  };
+
+  // Header link back to dashboard with context
+  (function updateHeaderLinks(){
+    const q = new URLSearchParams();
+    if (state.username) q.set("username", state.username);
+    $("linkDashboard").href = "dashboard.html" + (q.toString() ? "?" + q.toString() : "");
+  })();
+
+  // ---------- Helpers ----------
+
+  function setHealth(text, cls) {
+    $("healthStatus").textContent = text;
+    $("healthStatus").className = `badge ${cls || ""}`;
+  }
+  function log(obj, statusClass) {
+    $("out").textContent = JSON.stringify(obj, null, 2);
+    if (statusClass) setHealth(statusClass === "ok" ? "ok" : "error", statusClass);
+  }
+  async function parseMaybeJson(res) {
+    try { return await res.json(); } catch { return { raw: await res.text().catch(() => "") }; }
+  }
+  async function apiGet(path) {
+    const res = await fetch(`${API_BASE_URL}${path}`, { headers: { "Accept": "application/json" } });
+    const data = await parseMaybeJson(res);
+    return { ok: res.ok, status: res.status, data };
+  }
+  async function apiPost(path, body) {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(body || {})
+    });
+    const data = await parseMaybeJson(res);
+    return { ok: res.ok, status: res.status, data };
+  }
+  async function apiPut(path, body) {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(body || {})
+    });
+    const data = await parseMaybeJson(res);
+    return { ok: res.ok, status: res.status, data };
+  }
+  async function ensureUser(username) {
+    const ex = await apiGet(`/users/${encodeURIComponent(username)}/exists`);
+    if (ex.ok && (ex.data?.exists === true || ex.data === true)) return { created:false, exists:true };
+    const cr = await apiPost(`/users`, { username });
+    return { created: cr.ok, data: cr.data, status: cr.status };
+  }
+
+  // ---------- Read/write form ----------
+  function v(id) { return $(id)?.value?.trim() ?? ""; }
+
+  function buildPayload() {
+    const custom = v("custom_instructions")
+      ? v("custom_instructions").split("\n").map(s => s.trim()).filter(Boolean) : [];
+
+    const payload = {
+      username: state.username,
+      bot_name: state.botName,
+      twitter_credentials: {
+        api_key: v("api_key"),
+        api_secret: v("api_secret"),
+        access_token: v("access_token"),
+        access_token_secret: v("access_token_secret"),
+        ...(v("bearer_token") ? { bearer_token: v("bearer_token") } : {})
+      },
+      persona_settings: {
+        personality: { name: v("p_name"), role: v("p_role"), tone: v("p_tone"), voice: v("p_voice") },
+        communication_style: { writing_style: v("cs_style"), humor_level: v("cs_humor"), emoji_usage: v("cs_emoji"), hashtag_strategy: v("cs_hash") },
+        interests_and_expertise: { primary_focus: v("ie_primary"), secondary_interests: v("ie_secondary"), buzzwords_to_use: v("ie_buzz_use"), buzzwords_to_avoid: v("ie_buzz_avoid") },
+        content_approach: { marketing_style: v("ca_style"), call_to_action: v("ca_cta"), target_audience: v("ca_audience"), value_proposition: v("ca_value") },
+        brand_voice_examples: { excitement: v("bv_ex"), curiosity: v("bv_cu"), authority: v("bv_au"), encouragement: v("bv_en") },
+        posting_guidelines: { tweet_length: v("pg_length"), content_mix: v("pg_mix"), response_style: v("pg_response"), brand_consistency: v("pg_brand") },
+        custom_instructions: custom
+      },
+      post_schedule: $("postSchedule").value,
+      reply_schedule: $("replySchedule").value
+    };
+    return payload;
+  }
+
+  function setIf(id, value) { 
+    const element = $(id);
+    if (element && value != null) {
+      console.log(`Setting ${id} to:`, value);
+      element.value = value;
+    } else {
+      console.log(`Not setting ${id} - element:`, element, "value:", value);
+    }
+  }
+
+  // Accept multiple backend shapes and populate all fields (including keys if returned)
+  function populateForm(data) {
+    console.log("populateForm received data:", data);
+    
+    // normalize
+    const root = data?.bot || data?.bot_info || data || {};
+    console.log("root:", root);
+    
+    const creds = root.twitter_credentials || root.credentials || {};
+    console.log("credentials:", creds);
+    
+    const ps = root.persona_settings || root.persona || {};
+    console.log("persona_settings:", ps);
+    
+    const personality = ps.personality || {};
+    const comms = ps.communication_style || {};
+    const ie = ps.interests_and_expertise || {};
+    const ca = ps.content_approach || {};
+    const bv = ps.brand_voice_examples || {};
+    const pg = ps.posting_guidelines || {};
+    const schedule = ps.schedule || root.schedule || root;
+    console.log("schedule:", schedule);
+
+    // Credentials (will show if your API returns them; if not, leave blank)
+    console.log("Setting credentials:", {
+      api_key: creds.api_key,
+      api_secret: creds.api_secret,
+      access_token: creds.access_token,
+      access_token_secret: creds.access_token_secret,
+      bearer_token: creds.bearer_token
+    });
+    
+    setIf("api_key", creds.api_key || "");
+    setIf("api_secret", creds.api_secret || "");
+    setIf("access_token", creds.access_token || "");
+    setIf("access_token_secret", creds.access_token_secret || "");
+    setIf("bearer_token", creds.bearer_token || "");
+
+    // Persona
+    setIf("p_name", personality.name || "");
+    setIf("p_role", personality.role || "");
+    setIf("p_tone", personality.tone || "");
+    setIf("p_voice", personality.voice || "");
+
+    setIf("cs_style", comms.writing_style || "");
+    setIf("cs_humor", comms.humor_level || "");
+    setIf("cs_emoji", comms.emoji_usage || "");
+    setIf("cs_hash", comms.hashtag_strategy || "");
+
+    setIf("ie_primary", ie.primary_focus || "");
+    setIf("ie_secondary", ie.secondary_interests || "");
+    setIf("ie_buzz_use", ie.buzzwords_to_use || "");
+    setIf("ie_buzz_avoid", ie.buzzwords_to_avoid || "");
+
+    setIf("ca_style", ca.marketing_style || "");
+    setIf("ca_cta", ca.call_to_action || "");
+    setIf("ca_audience", ca.target_audience || "");
+    setIf("ca_value", ca.value_proposition || "");
+
+    setIf("bv_ex", bv.excitement || "");
+    setIf("bv_cu", bv.curiosity || "");
+    setIf("bv_au", bv.authority || "");
+    setIf("bv_en", bv.encouragement || "");
+
+    setIf("pg_length", pg.tweet_length || "");
+    setIf("pg_mix", pg.content_mix || "");
+    setIf("pg_response", pg.response_style || "");
+    setIf("pg_brand", pg.brand_consistency || "");
+
+    if (Array.isArray(ps.custom_instructions)) {
+      setIf("custom_instructions", ps.custom_instructions.join("\n"));
+    }
+
+    if (schedule.post_schedule) $("postSchedule").value = schedule.post_schedule;
+    if (schedule.reply_schedule) $("replySchedule").value = schedule.reply_schedule;
+
+    // Optional: reflect status in badge if provided
+    const status = root.status || data?.status;
+    if (status) setHealth(status, status === "running" ? "ok" : "warn");
+  }
+
+  // ---------- Load current bot from the database ----------
+  async function loadDetails() {
+    $("titleBot").textContent = state.botName || "—";
+    $("routeHint").textContent = `/users/${state.username || "—"}/bots/${state.botName || "—"}`;
+
+    if (!state.username || !state.botName) {
+      setHealth("missing params", "warn");
+      return log({ error: "username and bot_name are required (pass as ?username=&bot_name=&base=)" }, "err");
+    }
+
+    try {
+      setHealth("loading…");
+      const r = await apiGet(`/users/${encodeURIComponent(state.username)}/bots/${encodeURIComponent(state.botName)}`);
+
+      if (!r.ok && r.status === 404) {
+        state.botExists = false;
+        setHealth("not found", "warn");
+        log({ info: "Bot not found. You can fill the form and click Save Bot to create it." }, "warn");
+        return;
+      }
+
+      state.botExists = r.ok;
+      setHealth(r.ok ? "ok" : `err ${r.status}`, r.ok ? "ok" : "err");
+      populateForm(r.data || {});
+      log({ details: r.data }, r.ok ? "ok" : "err");
+    } catch (e) {
+      setHealth("error", "err");
+      log({ error: String(e) }, "err");
+    }
+  }
+
+  // ---------- Actions ----------
+  $("btnRefresh").addEventListener("click", loadDetails);
+
+  $("btnStart").addEventListener("click", async () => {
+    const r = await apiPost(`/bots/start`, { username: state.username, bot_name: state.botName });
+    log(r, r.ok ? "ok" : "err");
+  });
+  $("btnStop").addEventListener("click", async () => {
+    const r = await apiPost(`/bots/stop`, { username: state.username, bot_name: state.botName });
+    log(r, r.ok ? "ok" : "err");
+  });
+  $("btnPost").addEventListener("click", async () => {
+    const r = await apiPost(`/bots/post`, { username: state.username, bot_name: state.botName });
+    log(r, r.ok ? "ok" : "err");
+  });
+  $("btnReply").addEventListener("click", async () => {
+    const r = await apiPost(`/bots/reply-to-mentions`, { username: state.username, bot_name: state.botName });
+    log(r, r.ok ? "ok" : "err");
+  });
+
+  $("btnSaveSchedule").addEventListener("click", async () => {
+    const payload = {
+      username: state.username,
+      bot_name: state.botName,
+      post_schedule: $("postSchedule").value,
+      reply_schedule: $("replySchedule").value
+    };
+    const r = await apiPut(`/users/${encodeURIComponent(state.username)}/bots/${encodeURIComponent(state.botName)}/schedule`, payload);
+    log(r, r.ok ? "ok" : "err");
+  });
+
+  $("btnSaveBot").addEventListener("click", async () => {
+    const payload = buildPayload();
+
+    // If creating a new bot, require all 4 keys; when updating, allow partial changes
+    const creating = !state.botExists;
+    if (creating) {
+      const tc = payload.twitter_credentials || {};
+      const missing = ["api_key","api_secret","access_token","access_token_secret"].filter(k => !tc[k]);
+      if (missing.length) return log({ ok:false, error:"Missing required Twitter credentials for new bot", fields:missing }, "warn");
+    }
+
+    const ensured = await ensureUser(state.username);
+    const r = await apiPost(`/bots`, payload);
+    log({ ensured, result: r }, r.ok ? "ok" : "err");
+    if (r.ok) { state.botExists = true; await loadDetails(); }
+  });
+
+  // ---------- Init ----------
+  document.addEventListener("DOMContentLoaded", loadDetails);
+</script>
+
+</body>
+</html>
