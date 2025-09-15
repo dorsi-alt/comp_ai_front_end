@@ -98,19 +98,19 @@
     const params = new URLSearchParams(location.search);
     const saved = JSON.parse(localStorage.getItem("tbp.defaults") || "{}");
 
+    const API_BASE_URL = "https://compaibackend-production.up.railway.app";
+
     const state = {
-      baseUrl: (params.get("base") || saved.baseUrl || "http://localhost:8000").replace(/\/$/, ""),
       username: params.get("username") || saved.username || "",
     };
 
     // Hint where values came from
     $("sourceHint").textContent = params.get("base") || params.get("username") ? "query params" : (saved.baseUrl || saved.username ? "localStorage" : "defaults");
 
-    // Keep "Create New Bot" + top nav link carrying username & base forward
+    // Keep "Create New Bot" + top nav link carrying username forward
     function updateCreateLinks() {
       const q = new URLSearchParams();
       if (state.username) q.set("username", state.username);
-      if (state.baseUrl) q.set("base", state.baseUrl);
       const suffix = q.toString() ? "?" + q.toString() : "";
       $("linkCreateNew").href = "create-bot.html" + suffix;
       $("linkCreateTop").href = "create-bot.html" + suffix;
@@ -122,7 +122,7 @@
       try { return await res.json(); } catch { return { raw: await res.text().catch(() => "") }; }
     }
     async function apiGet(path) {
-      const res = await fetch(`${state.baseUrl}${path}`, { headers: { "Accept": "application/json" } });
+      const res = await fetch(`${API_BASE_URL}${path}`, { headers: { "Accept": "application/json" } });
       const data = await parseMaybeJson(res);
       return { ok: res.ok, status: res.status, data };
     }
@@ -148,7 +148,7 @@
 
       for (const bot of items) {
         const name = bot.bot_name || bot.name || "(unnamed)";
-        const q = new URLSearchParams({ username: state.username, bot_name: name, base: state.baseUrl });
+        const q = new URLSearchParams({ username: state.username, bot_name: name });
         const href = `bot-management.html?${q.toString()}`;
         const card = document.createElement("a");
         card.className = "glass-card bot-card";
@@ -165,7 +165,6 @@
 
     // ---------- Page load: GET /users/{username}/bots ----------
     async function listBotsOnLoad() {
-      if (!state.baseUrl) { setHealth("no base url", "warn"); $("botList").innerHTML = `<div class="empty">Missing base URL.</div>`; return; }
       if (!state.username) { setHealth("username?", "warn"); $("botList").innerHTML = `<div class="empty">Add a username via <span class="mono">?username=…</span> or save it in <span class="mono">localStorage["tbp.defaults"]</span> from the create-bot page.</div>`; return; }
 
       try {
