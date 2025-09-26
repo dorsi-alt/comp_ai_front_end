@@ -197,7 +197,6 @@
           <div class="btn-row" style="margin-top:8px">
             <button id="btnSaveSchedule" class="contact-badge">Save Schedule</button>
           </div>
-          <small class="mono">PUT /users/&lt;u&gt;/bots/&lt;bot&gt;/schedule</small>
         </div>
 
         <!-- Controls -->
@@ -210,22 +209,15 @@
             <button id="btnReply" class="glass-card">Reply to Mentions</button>
             <button id="btnRefresh" class="glass-card">Refresh</button>
           </div>
-          <small class="mono">POST /bots/start · /bots/stop · /bots/post · /bots/reply-to-mentions</small>
         </div>
 
         <!-- Save Bot -->
         <div class="glass-card" style="grid-column:1/-1;">
           <h3>Save Bot</h3>
-          <p class="subtitle">Saves all sections (credentials + persona + schedule) via <span class="mono">POST /bots</span> after ensuring the user exists.</p>
+          <p class="subtitle">Keep credentials, persona, and scheduling in sync with a single save.</p>
           <div class="btn-row">
             <button id="btnSaveBot" class="contact-badge">Save Bot</button>
           </div>
-        </div>
-
-        <!-- Output -->
-        <div class="glass-card" style="grid-column:1/-1;">
-          <h3>Output</h3>
-          <pre id="out" class="code mono">{}</pre>
         </div>
 
       </div>
@@ -280,7 +272,7 @@
     $("healthStatus").className = `badge ${cls || ""}`;
   }
   function log(obj, statusClass) {
-    $("out").textContent = JSON.stringify(obj, null, 2);
+    console.log('[bot-management]', obj);
     if (statusClass) setHealth(statusClass === "ok" ? "ok" : "error", statusClass);
   }
   async function parseMaybeJson(res) {
