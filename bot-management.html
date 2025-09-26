@@ -92,6 +92,10 @@
               <input id="bearer_token" class="input" type="text" autocomplete="off" />
             </div>
           </div>
+          <div class="btn-row" style="margin-top:12px">
+            <button id="btnLinkTwitter" class="contact-badge" type="button">Connect with Twitter</button>
+            <span id="oauthStatus" class="mono" style="font-size:0.9rem"></span>
+          </div>
         </div>
 
         <!-- Persona: Personality -->
@@ -234,8 +238,9 @@
       <div class="footer-content"><div class="footer-left"><p>&nbsp;</p></div><div class="footer-right"><p>&nbsp;</p></div></div>
     </div>
   </footer>
-
+  
   <script src="config.js"></script>
+  <script src="twitter-oauth.js"></script>
   <script>
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
@@ -249,6 +254,17 @@
     botName: params.get("bot_name") || "",
     botExists: false,
   };
+
+  const oauthStatus = $("oauthStatus");
+
+  function setOAuthStatus(message, tone) {
+    if (!oauthStatus) return;
+    oauthStatus.textContent = message || "";
+    oauthStatus.style.color =
+      tone === "ok" ? "#22d3ee" :
+      tone === "err" ? "#ff7b7b" :
+      tone === "warn" ? "#ffd166" : "";
+  }
 
   // Header link back to dashboard with context
   (function updateHeaderLinks(){
@@ -427,10 +443,12 @@
   async function loadDetails() {
     $("titleBot").textContent = state.botName || "—";
     $("routeHint").textContent = `/users/${state.username || "—"}/bots/${state.botName || "—"}`;
+    setOAuthStatus("");
 
     if (!state.username || !state.botName) {
       setHealth("missing params", "warn");
-      return log({ error: "username and bot_name are required (pass as ?username=&bot_name=&base=)" }, "err");
+      log({ error: "username and bot_name are required (pass as ?username=&bot_name=&base=)" }, "err");
+      return null;
     }
 
     try {
@@ -441,17 +459,74 @@
         state.botExists = false;
         setHealth("not found", "warn");
         log({ info: "Bot not found. You can fill the form and click Save Bot to create it." }, "warn");
-        return;
+        return r;
       }
 
       state.botExists = r.ok;
       setHealth(r.ok ? "ok" : `err ${r.status}`, r.ok ? "ok" : "err");
       populateForm(r.data || {});
       log({ details: r.data }, r.ok ? "ok" : "err");
+      return r;
     } catch (e) {
       setHealth("error", "err");
       log({ error: String(e) }, "err");
+      return { ok: false, error: e };
     }
+  }
+
+  const linkBtn = $("btnLinkTwitter");
+  if (linkBtn && window.TwitterOAuth) {
+    linkBtn.addEventListener("click", async () => {
+      if (!state.username) {
+        setOAuthStatus("Missing username context", "warn");
+        return;
+      }
+      if (!state.botName) {
+        setOAuthStatus("Missing bot name context", "warn");
+        return;
+      }
+
+      const originalLabel = linkBtn.textContent;
+      linkBtn.disabled = true;
+      linkBtn.textContent = "Connecting…";
+
+      try {
+        setOAuthStatus("Opening Twitter authorization…");
+        const outcome = await TwitterOAuth.start({
+          apiBaseUrl: API_BASE_URL,
+          username: state.username,
+          botName: state.botName,
+          ensureUser: (name) => ensureUser(name),
+          onPopupBlocked: () => setOAuthStatus("Please enable popups for this site", "warn"),
+        });
+
+        log({ oauth: outcome?.payload || { status: "success" } });
+        setOAuthStatus("Authorization complete. Refreshing bot…");
+        const refreshed = await loadDetails();
+        if (refreshed?.ok) {
+          const accountLabel = outcome?.payload?.accountUsername
+            ? `@${outcome.payload.accountUsername}`
+            : outcome?.payload?.accountId
+              ? `account ${outcome.payload.accountId}`
+              : "";
+          setOAuthStatus(
+            accountLabel ? `Twitter account connected as ${accountLabel}` : "Twitter account connected!",
+            "ok"
+          );
+        } else if (refreshed?.status === 404) {
+          setOAuthStatus("Credentials saved but bot record not found", "warn");
+        } else if (refreshed?.ok === false && refreshed?.error) {
+          setOAuthStatus(`Refresh failed: ${String(refreshed.error)}`, "err");
+        } else {
+          setOAuthStatus("Refresh failed", "warn");
+        }
+      } catch (err) {
+        setOAuthStatus(`Twitter auth failed: ${err.message}`, "err");
+      } finally {
+        linkBtn.disabled = false;
+        linkBtn.textContent = originalLabel;
+      }
+    });
   }
 
   // ---------- Actions ----------

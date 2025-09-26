@@ -93,17 +93,16 @@
           </div>
         </div>
 
-        <!-- Credentials -->
+        <!-- Status Dashboard -->
         <div class="glass-card">
-          <h3>Twitter Credentials</h3>
-          <div class="form-grid">
-            <div><label>API Key (Consumer Key)</label><input id="api_key" class="input" /></div>
-            <div><label>API Secret (Consumer Secret)</label><input id="api_secret" class="input" /></div>
-            <div><label>Access Token</label><input id="access_token" class="input" /></div>
-            <div><label>Access Token Secret</label><input id="access_token_secret" class="input" /></div>
-            <div><label>Bearer Token <span class="accent">(for mentions)</span></label><input id="bearer_token" class="input" /></div>
+          <h3>Setup Progress</h3>
+          <div style="display: grid; gap: 8px; margin-bottom: 16px;">
+            <div id="statusUser" class="mono" style="font-size: 0.9rem;">1️⃣ User: Not checked</div>
+            <div id="statusTwitter" class="mono" style="font-size: 0.9rem;">2️⃣ Twitter: Not connected</div>
+            <div id="statusBot" class="mono" style="font-size: 0.9rem;">3️⃣ Bot: Not created</div>
           </div>
         </div>
+
 
         <!-- Personality -->
         <div class="glass-card">
@@ -174,11 +173,22 @@ Keep tone positive and motivating
 Include relevant hashtags"></textarea>
         </div> -->
 
+        <!-- Twitter Connection & Bot Creation -->
         <div class="glass-card">
-          <div class="btn-row">
-            <button id="btnLoadExample" class="glass-card">Load Example</button>
-            <button id="btnCreate" class="contact-badge">Create Bot</button>
+          <h3>Connect & Create</h3>
+          <p style="margin-bottom: 16px; opacity: 0.8;">First connect your Twitter account, then create your bot.</p>
+
+          <div class="btn-row" style="margin-bottom: 16px;">
+            <button id="btnConnectTwitter" type="button" class="glass-card">1. Connect Twitter</button>
+            <span id="oauthStatus" class="mono" style="font-size:0.9rem"></span>
           </div>
+
+          <div class="btn-row" style="margin-bottom: 16px;">
+            <button id="btnLoadExample" class="glass-card">Load Example Data</button>
+            <button id="btnCreate" class="contact-badge">2. Create Bot</button>
+          </div>
+
+          <div id="createStatus" class="mono" style="font-size: 0.9rem; min-height: 20px;"></div>
         </div>
 
         <!-- <div class="glass-card">
@@ -216,6 +226,7 @@ Include relevant hashtags"></textarea>
 
   <!-- Scripts -->
   <script src="config.js"></script>
+  <script src="twitter-oauth.js"></script>
   <script>
   const $ = (id) => document.getElementById(id);
   const P = (o) => JSON.stringify(o, null, 2);
@@ -228,16 +239,67 @@ Include relevant hashtags"></textarea>
 
   const state = {
     username: params.get("username") || saved.username || "",
+    botName: params.get("bot_name") || saved.botName || "",
   };
 
   // Safely grab optional elements (some are commented out in your HTML)
   const preview = $("preview");
   const responseEl = $("response");
+  const oauthStatus = $("oauthStatus");
+  const createStatus = $("createStatus");
+  const statusUser = $("statusUser");
+  const statusTwitter = $("statusTwitter");
+  const statusBot = $("statusBot");
+
+  function setOAuthStatus(message, tone) {
+    if (!oauthStatus) return;
+    oauthStatus.textContent = message || "";
+    oauthStatus.style.color =
+      tone === "ok" ? "#22d3ee" :
+      tone === "err" ? "#ff7b7b" :
+      tone === "warn" ? "#ffd166" : "";
+  }
+
+  function setCreateStatus(message, tone) {
+    if (!createStatus) return;
+    createStatus.textContent = message || "";
+    createStatus.style.color =
+      tone === "ok" ? "#22d3ee" :
+      tone === "err" ? "#ff7b7b" :
+      tone === "warn" ? "#ffd166" : "";
+  }
+
+  function updateStatusDashboard() {
+    const username = $("username")?.value?.trim() || state.username;
+    const botName = $("botName")?.value?.trim();
+
+    // Update user status
+    if (statusUser) {
+      if (username) {
+        statusUser.textContent = `1️⃣ User: ${username}`;
+        statusUser.style.color = "#22d3ee";
+      } else {
+        statusUser.textContent = "1️⃣ User: Not set";
+        statusUser.style.color = "#ffd166";
+      }
+    }
+
+    // Update bot name status
+    if (statusBot) {
+      if (botName) {
+        statusBot.textContent = `3️⃣ Bot: ${botName} (ready to create)`;
+        statusBot.style.color = "#ffd166";
+      } else {
+        statusBot.textContent = "3️⃣ Bot: Name not set";
+        statusBot.style.color = "#888";
+      }
+    }
+  }
 
   // Restore defaults and populate input fields
   (() => {
     if ($("username")) $("username").value = state.username;
-    if (saved.botName && $("botName")) $("botName").value = saved.botName;
+    if ($("botName")) $("botName").value = state.botName;
     if ($("postSchedule") && saved.postSchedule) $("postSchedule").value = saved.postSchedule;
     if ($("replySchedule") && saved.replySchedule) $("replySchedule").value = saved.replySchedule;
   })();
@@ -246,12 +308,16 @@ Include relevant hashtags"></textarea>
   const saveBtn = $("btnSaveDefaults");
   if (saveBtn) {
     saveBtn.addEventListener("click", () => {
+      const username = $("username")?.value?.trim() || state.username;
+      const botName = $("botName")?.value?.trim();
       localStorage.setItem("tbp.defaults", JSON.stringify({
-        username: $("username")?.value?.trim() || state.username,
-        botName: $("botName")?.value?.trim(),
+        username,
+        botName,
         postSchedule: $("postSchedule")?.value,
         replySchedule: $("replySchedule")?.value,
       }));
+      state.username = username;
+      state.botName = botName;
       if (responseEl) responseEl.textContent = P({ message: "Defaults saved." });
     });
   }
@@ -266,13 +332,6 @@ Include relevant hashtags"></textarea>
     const payload = {
       username,
       bot_name: $("botName")?.value?.trim(),
-      twitter_credentials: {
-        api_key: $("api_key")?.value?.trim(),
-        api_secret: $("api_secret")?.value?.trim(),
-        access_token: $("access_token")?.value?.trim(),
-        access_token_secret: $("access_token_secret")?.value?.trim(),
-        ...($("bearer_token")?.value?.trim() ? { bearer_token: $("bearer_token").value.trim() } : {})
-      },
       persona_settings: {
         personality: {
           name: $("p_name")?.value?.trim(),
@@ -318,12 +377,103 @@ Include relevant hashtags"></textarea>
     return payload;
   }
 
-  // Live preview (guard if preview panel is commented out)
+  function setValue(id, value) {
+    const el = $(id);
+    if (!el) return;
+    el.value = value != null ? value : "";
+  }
+
+  function applyBotData(data) {
+    const root = data?.bot || data?.bot_info || data || {};
+    // Note: Twitter credentials now handled via OAuth - no manual input fields
+
+    const persona = root.persona || root.persona_settings;
+    if (persona) {
+      const personality = persona.personality || {};
+      setValue("p_name", personality.name);
+      setValue("p_role", personality.role);
+      setValue("p_tone", personality.tone);
+      setValue("p_voice", personality.voice);
+
+      const communication = persona.communication_style || {};
+      setValue("cs_style", communication.writing_style);
+      setValue("cs_humor", communication.humor_level);
+      setValue("cs_emoji", communication.emoji_usage);
+      setValue("cs_hash", communication.hashtag_strategy);
+
+      const interests = persona.interests_and_expertise || {};
+      setValue("ie_primary", interests.primary_focus);
+      setValue("ie_secondary", interests.secondary_interests);
+      setValue("ie_buzz_use", interests.buzzwords_to_use);
+      setValue("ie_buzz_avoid", interests.buzzwords_to_avoid);
+
+      const content = persona.content_approach || {};
+      setValue("ca_style", content.marketing_style);
+      setValue("ca_cta", content.call_to_action);
+      setValue("ca_audience", content.target_audience);
+      setValue("ca_value", content.value_proposition);
+
+      const voice = persona.brand_voice_examples || {};
+      setValue("bv_ex", voice.excitement);
+      setValue("bv_cu", voice.curiosity);
+      setValue("bv_au", voice.authority);
+      setValue("bv_en", voice.encouragement);
+
+      const posting = persona.posting_guidelines || {};
+      setValue("pg_length", posting.tweet_length);
+      setValue("pg_mix", posting.content_mix);
+      setValue("pg_response", posting.response_style);
+      setValue("pg_brand", posting.brand_consistency);
+
+      if (Array.isArray(persona.custom_instructions) && $("custom_instructions")) {
+        $("custom_instructions").value = persona.custom_instructions.join("\n");
+      }
+    }
+
+    const schedule = root.schedule || root;
+    if (schedule.post_schedule && $("postSchedule")) $("postSchedule").value = schedule.post_schedule;
+    if (schedule.reply_schedule && $("replySchedule")) $("replySchedule").value = schedule.reply_schedule;
+  }
+
+  async function fetchBotDetails(username, botName) {
+    const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(username)}/bots/${encodeURIComponent(botName)}`, {
+      method: "GET",
+      headers: { "Accept": "application/json" }
+    });
+    const data = await safeJson(res);
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  async function refreshBotFromServer({ notify } = {}) {
+    const username = $("username")?.value?.trim() || state.username;
+    const botName = $("botName")?.value?.trim();
+    if (!username || !botName) return null;
+
+    try {
+      const result = await fetchBotDetails(username, botName);
+      if (result.ok) {
+        applyBotData(result.data);
+        if (preview) preview.textContent = P(buildPayload());
+        if (notify) setOAuthStatus("Loaded saved bot data", "ok");
+      } else if (notify) {
+        const msg = result.status === 404 ? "No saved data found yet" : `Load failed (${result.status})`;
+        setOAuthStatus(msg, result.status === 404 ? "warn" : "err");
+      }
+      return result;
+    } catch (err) {
+      if (notify) setOAuthStatus(`Failed to load bot: ${err.message}`, "err");
+      return { ok: false, error: err };
+    }
+  }
+
+  // Live preview and status updates
   const inputs = Array.from(document.querySelectorAll("input, textarea, select"));
   inputs.forEach(el => el.addEventListener("input", () => {
     if (preview) preview.textContent = P(buildPayload());
+    updateStatusDashboard();
   }));
   if (preview) preview.textContent = P(buildPayload());
+  updateStatusDashboard();
 
   // -------- Load Example (fills ALL fields) --------
   $("btnLoadExample").addEventListener("click", () => {
@@ -332,12 +482,7 @@ Include relevant hashtags"></textarea>
     if ($("postSchedule")) $("postSchedule").value = "daily";
     if ($("replySchedule")) $("replySchedule").value = "hourly";
 
-    // Credentials (dummy placeholders — replace with real keys when creating for real)
-    if ($("api_key")) $("api_key").value = "EXAMPLE_API_KEY_123";
-    if ($("api_secret")) $("api_secret").value = "EXAMPLE_API_SECRET_456";
-    if ($("access_token")) $("access_token").value = "EXAMPLE_ACCESS_TOKEN_789";
-    if ($("access_token_secret")) $("access_token_secret").value = "EXAMPLE_ACCESS_TOKEN_SECRET_ABC";
-    if ($("bearer_token")) $("bearer_token").value = "EXAMPLE_BEARER_TOKEN_DEF";
+    // Note: Twitter credentials now handled via OAuth - no manual input fields
 
     // Persona — Personality
     if ($("p_name")) $("p_name").value = "Marketing Pro";
@@ -390,6 +535,68 @@ Include relevant hashtags`;
     try { return await res.json(); } catch { return { raw: await res.text().catch(() => "") }; }
   }
 
+  const connectBtn = $("btnConnectTwitter");
+  if (connectBtn && window.TwitterOAuth) {
+    connectBtn.addEventListener("click", async () => {
+      const username = $("username")?.value?.trim() || state.username;
+      const botName = $("botName")?.value?.trim() || state.botName;
+
+      if (!username) {
+        setOAuthStatus("Enter a username before linking Twitter", "warn");
+        return;
+      }
+      if (!botName) {
+        setOAuthStatus("Enter a bot name before linking Twitter", "warn");
+        return;
+      }
+
+      state.username = username;
+      state.botName = botName;
+
+      const originalLabel = connectBtn.textContent;
+      connectBtn.disabled = true;
+      connectBtn.textContent = "Connecting…";
+
+      try {
+        setOAuthStatus("Opening Twitter authorization…");
+        const outcome = await TwitterOAuth.start({
+          apiBaseUrl: API_BASE_URL,
+          username,
+          botName,
+          ensureUser: (name) => ensureUser(API_BASE_URL, name),
+          onPopupBlocked: () => setOAuthStatus("Please enable popups for this site", "warn"),
+        });
+
+        if (responseEl) {
+          responseEl.textContent = P({ oauth: outcome?.payload || { status: "success" } });
+        }
+
+        // Get account info from OAuth response
+        const accountLabel = outcome?.payload?.accountUsername
+          ? `@${outcome.payload.accountUsername}`
+          : outcome?.payload?.accountId
+            ? `account ${outcome.payload.accountId}`
+            : "";
+
+        setOAuthStatus(
+          accountLabel ? `✅ Connected as ${accountLabel}` : "✅ Twitter connected!",
+          "ok"
+        );
+
+        // Update Twitter status in dashboard
+        if (statusTwitter) {
+          statusTwitter.textContent = accountLabel ? `2️⃣ Twitter: ${accountLabel} ✅` : "2️⃣ Twitter: Connected ✅";
+          statusTwitter.style.color = "#22d3ee";
+        }
+      } catch (err) {
+        setOAuthStatus(`Twitter auth failed: ${err.message}`, "err");
+      } finally {
+        connectBtn.disabled = false;
+        connectBtn.textContent = originalLabel;
+      }
+    });
+  }
+
   async function ensureUser(baseUrl, username) {
     const existsRes = await fetch(`${baseUrl}/users/${encodeURIComponent(username)}/exists`, { method: "GET" });
     const existsData = await safeJson(existsRes);
@@ -405,30 +612,41 @@ Include relevant hashtags`;
   }
 
   async function createBot() {
-    const payload = buildPayload();
-
-    // Validate username and required fields
-    if (!payload.username) {
-      if (responseEl) responseEl.textContent = P({ error: "Username is required. Pass it via URL parameter ?username=your_username or save it using Save Defaults." });
-      return;
-    }
-
-    const req = [
-      ["bot_name", payload.bot_name],
-      ["api_key", payload.twitter_credentials.api_key],
-      ["api_secret", payload.twitter_credentials.api_secret],
-      ["access_token", payload.twitter_credentials.access_token],
-      ["access_token_secret", payload.twitter_credentials.access_token_secret],
-    ];
-    const missing = req.filter(([k,v]) => !v).map(([k]) => k);
-    if (missing.length) {
-      if (responseEl) responseEl.textContent = P({ error: "Missing required fields", fields: missing });
-      return;
-    }
+    const createBtn = $("btnCreate");
+    const originalText = createBtn.textContent;
 
     try {
+      setCreateStatus("🔄 Starting bot creation...", "");
+      createBtn.disabled = true;
+      createBtn.textContent = "Creating...";
+
+      const payload = buildPayload();
+
+      state.username = payload.username;
+      state.botName = payload.bot_name;
+
+      // Validate username and required fields
+      if (!payload.username) {
+        setCreateStatus("❌ Username is required", "err");
+        if (responseEl) responseEl.textContent = P({ error: "Username is required. Pass it via URL parameter ?username=your_username or save it using Save Defaults." });
+        return;
+      }
+
+      if (!payload.bot_name) {
+        setCreateStatus("❌ Bot name is required", "err");
+        if (responseEl) responseEl.textContent = P({ error: "Bot name is required." });
+        return;
+      }
+
+      setCreateStatus("✅ Validation passed - ensuring user exists...", "");
+
       // Ensure user exists
-      await ensureUser(API_BASE_URL, payload.username);
+      const userResult = await ensureUser(API_BASE_URL, payload.username);
+      if (userResult.created) {
+        setCreateStatus("✅ User created - now creating bot...", "");
+      } else {
+        setCreateStatus("✅ User found - now creating bot...", "");
+      }
 
       // Create bot
       const res = await fetch(`${API_BASE_URL}/bots`, {
@@ -441,12 +659,38 @@ Include relevant hashtags`;
       if (responseEl) {
         responseEl.textContent = P({ ok: res.ok, status: res.status, data });
       }
+
+      if (res.ok) {
+        setCreateStatus("🎉 Bot created successfully! Check your dashboard.", "ok");
+        // Update bot status in dashboard
+        if (statusBot) {
+          statusBot.textContent = `3️⃣ Bot: ${payload.bot_name} ✅ Created!`;
+          statusBot.style.color = "#22d3ee";
+        }
+      } else {
+        const errorMsg = data.detail || data.message || `HTTP ${res.status}`;
+        setCreateStatus(`❌ Creation failed: ${errorMsg}`, "err");
+        // Update bot status in dashboard
+        if (statusBot) {
+          statusBot.textContent = `3️⃣ Bot: Creation failed`;
+          statusBot.style.color = "#ff7b7b";
+        }
+      }
     } catch (e) {
+      setCreateStatus(`❌ Error: ${e.message}`, "err");
       if (responseEl) responseEl.textContent = P({ ok: false, error: String(e) });
+    } finally {
+      createBtn.disabled = false;
+      createBtn.textContent = originalText;
     }
   }
 
   document.getElementById("btnCreate").addEventListener("click", createBot);
+
+  // Initialize status dashboard on page load
+  document.addEventListener("DOMContentLoaded", () => {
+    updateStatusDashboard();
+  });
 </script>
 
 </body>

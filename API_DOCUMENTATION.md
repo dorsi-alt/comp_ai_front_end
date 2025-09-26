@@ -86,10 +86,41 @@ Check if a user already exists in the system.
 
 ---
 
-### 3. Bot Management
+### 3. Twitter OAuth
+
+Use these helper endpoints to link a user's Twitter account without manually copying API keys.
+
+#### `GET /auth/twitter/start` - Begin OAuth Flow
+Return a Twitter authorization URL for an existing user/bot label. The frontend should open the URL in a new window and wait for the callback to complete.
+
+**Request:**
+- Method: `GET`
+- URL: `http://localhost:8000/auth/twitter/start?username=john_doe&bot_name=my_marketing_bot`
+- Optional query `redirect_url` lets you control where the callback redirects after success.
+
+**Response:**
+```json
+{
+  "authorization_url": "https://twitter.com/i/oauth?..."
+}
+```
+
+#### `GET /auth/twitter/callback` - OAuth Callback
+Twitter redirects here after the user authorizes the app. The backend exchanges tokens and stores them. By default, it returns a minimal HTML page that posts a success message (`source: "twitter-oauth"`) back to the opener window.
+
+- Required query params: `oauth_token`, `oauth_verifier`
+- Will respond with HTTP 302 if `redirect_url` was supplied to the start endpoint.
+
+**Notes:**
+- The callback creates/updates the bot's stored credentials with `access_token` and `access_token_secret`.
+- You must create the platform user (`POST /users`) before starting OAuth.
+
+---
+
+### 4. Bot Management
 
 #### `POST /bots` - Create Bot
-Create a new Twitter bot with personality and scheduling settings.
+Create or update a Twitter bot persona and scheduling settings. Twitter access tokens from the OAuth flow are required before this call will succeed.
 
 **Request:**
 - Method: `POST`
@@ -100,13 +131,6 @@ Create a new Twitter bot with personality and scheduling settings.
 {
   "username": "john_doe",
   "bot_name": "my_marketing_bot",
-  "twitter_credentials": {
-    "api_key": "your_api_key",
-    "api_secret": "your_api_secret",
-    "access_token": "your_access_token",
-    "access_token_secret": "your_access_token_secret",
-    "bearer_token": "your_bearer_token"
-  },
   "persona_settings": {
     "personality": {
       "name": "Marketing Pro",
@@ -155,6 +179,8 @@ Create a new Twitter bot with personality and scheduling settings.
 }
 ```
 
+> Optional: include `twitter_credentials` with specific overrides (e.g., a custom bearer token) if you need to augment the OAuth-generated tokens. Omit it for the standard flow.
+
 **Response (Success - 200):**
 ```json
 {
@@ -170,6 +196,13 @@ Create a new Twitter bot with personality and scheduling settings.
 ```json
 {
   "detail": "User 'john_doe' not found"
+}
+```
+
+**Response (Error - 400 when OAuth incomplete):**
+```json
+{
+  "detail": "Twitter account not connected. Complete the OAuth flow before creating the bot."
 }
 ```
 
