@@ -190,15 +190,15 @@
         <div class="glass-card">
           <h3>Setup Progress</h3>
           <ul class="status-steps">
-            <li id="statusUser" class="status-item warn">
+            <li id="statusForm" class="status-item warn">
               <span class="status-dot" aria-hidden="true"></span>
-              <span class="status-text">1️⃣ User: Not checked</span>
-              <span class="status-note">Set your username</span>
+              <span class="status-text">1️⃣ Form: Details incomplete</span>
+              <span class="status-note">Fill persona + schedules</span>
             </li>
             <li id="statusTwitter" class="status-item">
               <span class="status-dot" aria-hidden="true"></span>
               <span class="status-text">2️⃣ Twitter: Not connected</span>
-              <span class="status-note">Link account</span>
+              <span class="status-note">Connect account</span>
             </li>
             <li id="statusBot" class="status-item">
               <span class="status-dot" aria-hidden="true"></span>
@@ -355,7 +355,7 @@ Include relevant hashtags"></textarea>
   const responseEl = $("response");
   const oauthStatus = $("oauthStatus");
   const createStatus = $("createStatus");
-  const statusUser = $("statusUser");
+  const statusForm = $("statusForm");
   const statusTwitter = $("statusTwitter");
   const statusBot = $("statusBot");
   const createBtn = $("btnCreate");
@@ -417,11 +417,23 @@ Include relevant hashtags"></textarea>
     const username = $("username")?.value?.trim() || state.username;
     const botName = $("botName")?.value?.trim();
 
-    // Update user status
-    if (username) {
-      updateStatusItem(statusUser, `1️⃣ User: ${username}`, 'ok', 'Ready');
+    const requiredInputs = [
+      $("username"), $("botName"),
+      $("p_name"), $("p_role"), $("p_tone"), $("p_voice"),
+      $("cs_style"), $("cs_humor"), $("cs_emoji"), $("cs_hash"),
+      $("ie_primary"), $("ie_secondary"), $("ie_buzz_use"), $("ie_buzz_avoid"),
+      $("ca_style"), $("ca_cta"), $("ca_audience"), $("ca_value"),
+      $("bv_ex"), $("bv_cu"), $("bv_au"), $("bv_en"),
+      $("pg_length"), $("pg_mix"), $("pg_response"), $("pg_brand")
+    ];
+
+    const missing = requiredInputs.filter((input) => !input || !input.value.trim());
+    const formComplete = missing.length === 0;
+
+    if (formComplete) {
+      updateStatusItem(statusForm, '1️⃣ Form: Details captured', 'ok', 'Ready');
     } else {
-      updateStatusItem(statusUser, '1️⃣ User: Not set', 'warn', 'Set your username');
+      updateStatusItem(statusForm, `1️⃣ Form: ${missing.length} fields remaining`, 'warn', 'Fill persona + schedules');
     }
 
     if (botName) {
@@ -611,11 +623,15 @@ Include relevant hashtags"></textarea>
   }));
   if (preview) preview.textContent = P(buildPayload());
   updateStatusDashboard();
+  if (state.username && state.botName) {
+    verifyBotCredentials(state.username, state.botName, false);
+  }
 
   // -------- Load Example (fills ALL fields) --------
   $("btnLoadExample").addEventListener("click", () => {
     // Bot identity + schedules
-    if ($("botName")) $("botName").value = "marketing_pro_bot";
+    const botNameField = $("botName");
+    if (botNameField && !botNameField.value) botNameField.value = "marketing_pro_bot";
     if ($("postSchedule")) $("postSchedule").value = "daily";
     if ($("replySchedule")) $("replySchedule").value = "hourly";
 
@@ -665,11 +681,65 @@ Include relevant hashtags`;
     }
 
     if (preview) preview.textContent = P(buildPayload());
+    state.botName = $("botName")?.value?.trim() || state.botName;
+    updateStatusDashboard();
   });
 
   // -------- Create Bot logic (unchanged except safe guards) --------
   async function safeJson(res) {
     try { return await res.json(); } catch { return { raw: await res.text().catch(() => "") }; }
+  }
+
+  async function fetchBotInfo(username, botName) {
+    if (!username || !botName) {
+      return { ok: false, reason: 'missing-context' };
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(username)}/bots/${encodeURIComponent(botName)}`);
+      const data = await safeJson(res);
+      if (!res.ok) {
+        return { ok: false, status: res.status, data };
+      }
+      return { ok: true, status: res.status, data };
+    } catch (error) {
+      return { ok: false, error };
+    }
+  }
+
+  function extractCredentials(botResponse) {
+    if (!botResponse) return null;
+    const root = botResponse.bot_info || botResponse.bot || botResponse;
+    return root?.twitter_credentials || root?.credentials || null;
+  }
+
+  async function verifyBotCredentials(username, botName, notify = true) {
+    const result = await fetchBotInfo(username, botName);
+    if (!result.ok) {
+      const detail = result.data?.detail;
+      const indicatesCreds = typeof detail === 'string' && detail.includes('Twitter credentials');
+      if (indicatesCreds) {
+        updateStatusItem(statusTwitter, '2️⃣ Twitter: Connected ✅', 'ok', 'Connected');
+        return { ok: true };
+      }
+
+      if (notify) {
+        setCreateStatus('⚠️ Unable to verify Twitter credentials. Please connect again.', 'warn');
+      }
+      updateStatusItem(statusTwitter, '2️⃣ Twitter: Not connected', 'warn', 'Link account');
+    } else {
+      const creds = extractCredentials(result.data?.bot_info || result.data);
+      const hasTokens = creds && creds.access_token && creds.access_token_secret;
+      if (hasTokens) {
+        updateStatusItem(statusTwitter, '2️⃣ Twitter: Connected ✅', 'ok', 'Connected');
+        return { ok: true, credentials: creds };
+      }
+      if (notify) {
+        setCreateStatus('⚠️ Twitter credentials missing. Reconnect via "Connect Twitter".', 'warn');
+      }
+      updateStatusItem(statusTwitter, '2️⃣ Twitter: Credentials missing', 'err', 'Reconnect');
+    }
+    return { ok: false };
   }
 
   const connectBtn = $("btnConnectTwitter");
@@ -720,13 +790,13 @@ Include relevant hashtags`;
           "ok"
         );
 
-        // Update Twitter status in dashboard
-        updateStatusItem(
-          statusTwitter,
-          accountLabel ? `2️⃣ Twitter: ${accountLabel} ✅` : '2️⃣ Twitter: Connected ✅',
-          'ok',
-          'Connected'
-        );
+        let verification = await verifyBotCredentials(username, botName, false);
+        if (!verification.ok) {
+          await new Promise((resolve) => setTimeout(resolve, 750));
+          await verifyBotCredentials(username, botName, false);
+        }
+
+        state.botName = botName;
       } catch (err) {
         setOAuthStatus(`Twitter auth failed: ${err.message}`, "err");
         updateStatusItem(statusTwitter, '2️⃣ Twitter: Authorization failed', 'err', 'Try again');
@@ -766,7 +836,7 @@ Include relevant hashtags`;
       if (!payload.username) {
         setCreateStatus("❌ Username is required", "err");
         if (responseEl) responseEl.textContent = P({ error: "Username is required. Pass it via URL parameter ?username=your_username or save it using Save Defaults." });
-        updateStatusItem(statusUser, '1️⃣ User: Not set', 'warn', 'Set your username');
+        updateStatusItem(statusForm, '1️⃣ Form: Details incomplete', 'warn', 'Add username');
         setCreateButtonState('idle');
         return;
       }
@@ -779,9 +849,23 @@ Include relevant hashtags`;
         return;
       }
 
-      updateStatusItem(statusUser, `1️⃣ User: ${payload.username}`, 'ok', 'Ready');
+      updateStatusItem(statusForm, '1️⃣ Form: Details captured', 'ok', 'Ready');
       updateStatusItem(statusBot, `3️⃣ Bot: ${payload.bot_name} (ready to create)`, 'warn', 'Creating…');
-      setCreateStatus("✅ Validation passed - ensuring user exists...", "");
+
+      let credentialStatus = await verifyBotCredentials(payload.username, payload.bot_name, false);
+      if (!credentialStatus.ok) {
+        await new Promise((resolve) => setTimeout(resolve, 750));
+        credentialStatus = await verifyBotCredentials(payload.username, payload.bot_name, false);
+      }
+
+      if (!credentialStatus.ok) {
+        setCreateStatus('❌ Twitter account not connected yet. Complete the OAuth flow and try again.', 'err');
+        updateStatusItem(statusBot, `3️⃣ Bot: ${payload.bot_name} (waiting for credentials)`, 'warn', 'Reconnect Twitter');
+        setCreateButtonState('idle');
+        return;
+      }
+
+      setCreateStatus("✅ Ensuring user exists...", "");
 
       const userResult = await ensureUser(API_BASE_URL, payload.username);
       if (userResult.created) {
@@ -789,6 +873,8 @@ Include relevant hashtags`;
       } else {
         setCreateStatus("✅ User found - preparing bot...", "");
       }
+
+      setCreateStatus("✅ Validation passed - creating bot...", "");
 
       const res = await fetch(`${API_BASE_URL}/bots`, {
         method: "POST",

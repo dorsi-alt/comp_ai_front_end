@@ -18,6 +18,41 @@
     }
     .textarea { min-height: 140px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .control-button {
+      position: relative;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .control-button.is-active {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(34, 211, 238, 0.3);
+    }
+    .control-button.is-active::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: inherit;
+      border: 1px solid rgba(34,211,238,.6);
+      opacity: 0.9;
+      animation: pulse 0.8s ease-in-out;
+    }
+    .control-button.is-error {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(255, 123, 123, 0.35);
+    }
+    .control-button.is-error::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: inherit;
+      border: 1px solid rgba(255,123,123,.6);
+      opacity: 0.9;
+      animation: pulse 0.8s ease-in-out;
+    }
+    @keyframes pulse {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      100% { opacity: 0; }
+    }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     pre.code {
       background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.08);
@@ -26,6 +61,42 @@
     .badge { padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.1); }
     .ok { color: #22d3ee; } .err { color: #ff7b7b; } .warn { color: #ffd166; }
     .field { display: grid; gap: 6px; }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      min-width: 260px;
+      max-width: 320px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(34,211,238,.35);
+      background: rgba(8,18,28,.92);
+      color: rgba(255,255,255,.95);
+      box-shadow: 0 18px 45px rgba(6,10,20,.32);
+      display: none;
+      z-index: 1000;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .toast.show {
+      display: block;
+      animation: toastFade 4.5s ease-in-out forwards;
+    }
+    .toast h4 {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #22d3ee;
+    }
+    .toast p { margin: 0; color: rgba(255,255,255,.8); }
+    .toast.toast--error { border-color: rgba(255,123,123,.45); }
+    .toast.toast--error h4 { color: #ff7b7b; }
+    @keyframes toastFade {
+      0% { opacity: 0; transform: translateY(-10px); }
+      5%, 85% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
   </style>
 </head>
 <body class="loaded internal-page">
@@ -66,6 +137,7 @@
   <!-- Content -->
   <section class="section">
     <div class="section-content">
+      <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
       <div class="grid">
         <!-- Twitter Credentials -->
         <div class="glass-card">
@@ -203,8 +275,8 @@
         <div class="glass-card">
           <h3>Controls</h3>
           <div class="btn-row">
-            <button id="btnStart" class="contact-badge">Start</button>
-            <button id="btnStop" class="glass-card">Stop</button>
+            <button id="btnStart" class="contact-badge control-button">Start</button>
+            <button id="btnStop" class="glass-card control-button">Stop</button>
             <button id="btnPost" class="glass-card">Manual Post</button>
             <button id="btnReply" class="glass-card">Reply to Mentions</button>
             <button id="btnRefresh" class="glass-card">Refresh</button>
@@ -274,6 +346,37 @@
   function log(obj, statusClass) {
     console.log('[bot-management]', obj);
     if (statusClass) setHealth(statusClass === "ok" ? "ok" : "error", statusClass);
+  }
+
+  const toastEl = $("toast");
+  let toastTimer = null;
+
+  function showToast({ title, body, tone = 'info' }) {
+    if (!toastEl) return;
+    toastEl.className = `toast toast--${tone}`;
+    toastEl.innerHTML = `
+      <h4>${title}</h4>
+      <p>${body}</p>
+    `;
+    toastEl.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.remove('show');
+    }, 4500);
+  }
+
+  function flashButton(button, tone = 'success') {
+    if (!button) return;
+    button.classList.remove('is-active', 'is-error');
+    button.offsetWidth; // force reflow
+    if (tone === 'success') {
+      button.classList.add('is-active');
+    } else {
+      button.classList.add('is-error');
+    }
+    setTimeout(() => {
+      button.classList.remove('is-active', 'is-error');
+    }, 1200);
   }
   async function parseMaybeJson(res) {
     try { return await res.json(); } catch { return { raw: await res.text().catch(() => "") }; }
@@ -524,13 +627,50 @@
   // ---------- Actions ----------
   $("btnRefresh").addEventListener("click", loadDetails);
 
-  $("btnStart").addEventListener("click", async () => {
+  const startBtn = $("btnStart");
+  const stopBtn = $("btnStop");
+
+  startBtn.addEventListener("click", async () => {
     const r = await apiPost(`/bots/start`, { username: state.username, bot_name: state.botName });
     log(r, r.ok ? "ok" : "err");
+    if (r.ok) {
+      const schedule = r.data?.schedule || {};
+      const post = schedule.posts || 'hourly';
+      const reply = schedule.replies || 'hourly';
+      showToast({
+        title: `Bot ${state.botName} activated`,
+        body: `Posting cadence: ${post}. Reply cadence: ${reply}.`,
+        tone: 'info'
+      });
+      flashButton(startBtn, 'success');
+    } else {
+      showToast({
+        title: `Unable to start ${state.botName}`,
+        body: r.data?.detail || 'Check logs for details.',
+        tone: 'error'
+      });
+      flashButton(startBtn, 'error');
+    }
   });
-  $("btnStop").addEventListener("click", async () => {
+
+  stopBtn.addEventListener("click", async () => {
     const r = await apiPost(`/bots/stop`, { username: state.username, bot_name: state.botName });
     log(r, r.ok ? "ok" : "err");
+    if (r.ok) {
+      showToast({
+        title: `Bot ${state.botName} stopped`,
+        body: 'Thank you for using Companion AI.',
+        tone: 'info'
+      });
+      flashButton(stopBtn, 'success');
+    } else {
+      showToast({
+        title: `Unable to stop ${state.botName}`,
+        body: r.data?.detail || 'Check logs for details.',
+        tone: 'error'
+      });
+      flashButton(stopBtn, 'error');
+    }
   });
   $("btnPost").addEventListener("click", async () => {
     const r = await apiPost(`/bots/post`, { username: state.username, bot_name: state.botName });
