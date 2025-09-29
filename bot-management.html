@@ -695,8 +695,11 @@
           tone: 'info'
         });
         flashButton(deleteBtn, 'success');
-        state.botExists = false;
-        await loadDetails();
+        const redirectUrl = new URL('dashboard.html', window.location.href);
+        redirectUrl.searchParams.set('username', state.username);
+        setTimeout(() => {
+          window.location.href = redirectUrl.toString();
+        }, 900);
       } else {
         showToast({
           title: `Unable to delete ${state.botName}`,
