@@ -277,6 +277,7 @@
           <div class="btn-row">
             <button id="btnStart" class="contact-badge control-button">Start</button>
             <button id="btnStop" class="glass-card control-button">Stop</button>
+            <button id="btnDelete" class="glass-card control-button delete">Delete</button>
             <button id="btnPost" class="glass-card">Manual Post</button>
             <button id="btnReply" class="glass-card">Reply to Mentions</button>
             <button id="btnRefresh" class="glass-card">Refresh</button>
@@ -629,6 +630,7 @@
 
   const startBtn = $("btnStart");
   const stopBtn = $("btnStop");
+  const deleteBtn = $("btnDelete");
 
   startBtn.addEventListener("click", async () => {
     const r = await apiPost(`/bots/start`, { username: state.username, bot_name: state.botName });
@@ -670,6 +672,46 @@
         tone: 'error'
       });
       flashButton(stopBtn, 'error');
+    }
+  });
+
+  deleteBtn.addEventListener("click", async () => {
+    const confirmDelete = window.confirm(`Delete ${state.botName}? This cannot be undone.`);
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/bots`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ username: state.username, bot_name: state.botName })
+      });
+      const data = await parseMaybeJson(res);
+      log({ delete: data }, res.ok ? "ok" : "err");
+
+      if (res.ok) {
+        showToast({
+          title: `Bot ${state.botName} deleted`,
+          body: 'All associated data has been removed.',
+          tone: 'info'
+        });
+        flashButton(deleteBtn, 'success');
+        state.botExists = false;
+        await loadDetails();
+      } else {
+        showToast({
+          title: `Unable to delete ${state.botName}`,
+          body: data?.detail || 'Check logs for details.',
+          tone: 'error'
+        });
+        flashButton(deleteBtn, 'error');
+      }
+    } catch (err) {
+      showToast({
+        title: `Delete failed`,
+        body: String(err),
+        tone: 'error'
+      });
+      flashButton(deleteBtn, 'error');
     }
   });
   $("btnPost").addEventListener("click", async () => {
@@ -715,3 +757,13 @@
 
 </body>
 </html>
+    .control-button.delete {
+      background: rgba(255, 72, 72, 0.12);
+      border: 1px solid rgba(255, 72, 72, 0.4);
+      color: #ff7777;
+    }
+    .control-button.delete:hover,
+    .control-button.delete:focus {
+      border-color: rgba(255, 72, 72, 0.6);
+      color: #ff9797;
+    }
