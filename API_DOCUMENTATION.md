@@ -4,12 +4,12 @@ A comprehensive REST API for creating and managing automated Twitter bots with c
 
 ## Base URL
 ```
-http://localhost:8000
+https://compaibackend-production.up.railway.app
 ```
 
 ## Interactive Documentation
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: https://compaibackend-production.up.railway.app/docs
+- **ReDoc**: https://compaibackend-production.up.railway.app/redoc
 
 ---
 
@@ -22,7 +22,7 @@ Check if the API is running.
 
 **Request:**
 - Method: `GET`
-- URL: `http://localhost:8000/`
+- URL: `https://compaibackend-production.up.railway.app/`
 - Headers: None
 - Body: None
 
@@ -43,7 +43,7 @@ Create a new user account.
 
 **Request:**
 - Method: `POST`
-- URL: `http://localhost:8000/users`
+- URL: `https://compaibackend-production.up.railway.app/users`
 - Headers: `Content-Type: application/json`
 - Body:
 ```json
@@ -72,7 +72,7 @@ Check if a user already exists in the system.
 
 **Request:**
 - Method: `GET`
-- URL: `http://localhost:8000/users/john_doe/exists`
+- URL: `https://compaibackend-production.up.railway.app/users/john_doe/exists`
 - Headers: None
 - Body: None
 
@@ -95,7 +95,7 @@ Return a Twitter authorization URL for an existing user/bot label. The frontend 
 
 **Request:**
 - Method: `GET`
-- URL: `http://localhost:8000/auth/twitter/start?username=john_doe&bot_name=my_marketing_bot`
+- URL: `https://compaibackend-production.up.railway.app/auth/twitter/start?username=john_doe&bot_name=my_marketing_bot`
 - Optional query `redirect_url` lets you control where the callback redirects after success.
 
 **Response:**
@@ -124,7 +124,7 @@ Create or update a Twitter bot persona and scheduling settings. Twitter access t
 
 **Request:**
 - Method: `POST`
-- URL: `http://localhost:8000/bots`
+- URL: `https://compaibackend-production.up.railway.app/bots`
 - Headers: `Content-Type: application/json`
 - Body:
 ```json
@@ -211,7 +211,7 @@ Get all bots for a specific user.
 
 **Request:**
 - Method: `GET`
-- URL: `http://localhost:8000/users/john_doe/bots`
+- URL: `https://compaibackend-production.up.railway.app/users/john_doe/bots`
 - Headers: None
 - Body: None
 
@@ -229,7 +229,7 @@ Get detailed information about a specific bot (credentials are masked).
 
 **Request:**
 - Method: `GET`
-- URL: `http://localhost:8000/users/john_doe/bots/my_marketing_bot`
+- URL: `https://compaibackend-production.up.railway.app/users/john_doe/bots/my_marketing_bot`
 - Headers: None
 - Body: None
 
@@ -265,7 +265,7 @@ Activate a bot - posts immediately then follows schedule.
 
 **Request:**
 - Method: `POST`
-- URL: `http://localhost:8000/bots/start`
+- URL: `https://compaibackend-production.up.railway.app/bots/start`
 - Headers: `Content-Type: application/json`
 - Body:
 ```json
@@ -299,7 +299,7 @@ Deactivate a bot and stop all scheduling.
 
 **Request:**
 - Method: `POST`
-- URL: `http://localhost:8000/bots/stop`
+- URL: `https://compaibackend-production.up.railway.app/bots/stop`
 - Headers: `Content-Type: application/json`
 - Body:
 ```json
@@ -325,7 +325,7 @@ Generate and post a tweet based on the bot's personality.
 
 **Request:**
 - Method: `POST`
-- URL: `http://localhost:8000/bots/post`
+- URL: `https://compaibackend-production.up.railway.app/bots/post`
 - Headers: `Content-Type: application/json`
 - Body:
 ```json
@@ -356,7 +356,7 @@ Automatically reply to recent mentions using the bot's personality.
 
 **Request:**
 - Method: `POST`
-- URL: `http://localhost:8000/bots/reply-to-mentions`
+- URL: `https://compaibackend-production.up.railway.app/bots/reply-to-mentions`
 - Headers: `Content-Type: application/json`
 - Body:
 ```json
@@ -410,7 +410,7 @@ Update bot's posting and reply schedule.
 
 **Request:**
 - Method: `PUT`
-- URL: `http://localhost:8000/users/john_doe/bots/my_marketing_bot/schedule`
+- URL: `https://compaibackend-production.up.railway.app/users/john_doe/bots/my_marketing_bot/schedule`
 - Headers: `Content-Type: application/json`
 - Body:
 ```json

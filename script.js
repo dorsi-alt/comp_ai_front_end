@@ -15,7 +15,7 @@ let isScrolling = false;
 let circleTransitions = [];
 
 const INTRO_FLAG_KEY = 'tbpIntroSeen';     // <-- remember we've started once
-const BASE_URL = window.API_CONFIG?.BASE_URL || 'http://localhost:8000';  // API base
+const BASE_URL = window.API_CONFIG?.BASE_URL || 'https://compaibackend-production.up.railway.app';  // API base
 
 function setupGeometricBackground() {
   const gridLinesGroup = document.getElementById("grid-lines");
