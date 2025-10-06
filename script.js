@@ -386,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSoundToggle();
 
   // Wallet modal bindings
-  const walletBtn = document.querySelector(".contact-badge");
+  const walletBtn = document.getElementById("connectWalletButton") || document.querySelector(".contact-badge");
   const walletClose = document.getElementById("walletClose");
   const walletForm = document.getElementById("walletForm");
 

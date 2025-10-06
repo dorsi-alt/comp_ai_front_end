@@ -187,8 +187,6 @@
           <div class="form-row">
             <div class="field"><label>Writing Style</label><input id="cs_style" class="input" /></div>
             <div class="field"><label>Humor Level</label><input id="cs_humor" class="input" /></div>
-            <div class="field"><label>Emoji Usage</label><input id="cs_emoji" class="input" /></div>
-            <div class="field"><label>Hashtag Strategy</label><input id="cs_hash" class="input" /></div>
           </div>
         </div>
 
@@ -431,7 +429,7 @@
       },
       persona_settings: {
         personality: { name: v("p_name"), role: v("p_role"), tone: v("p_tone"), voice: v("p_voice") },
-        communication_style: { writing_style: v("cs_style"), humor_level: v("cs_humor"), emoji_usage: v("cs_emoji"), hashtag_strategy: v("cs_hash") },
+        communication_style: { writing_style: v("cs_style"), humor_level: v("cs_humor"), emoji_usage: "None", hashtag_strategy: "Avoid hashtags" },
         interests_and_expertise: { primary_focus: v("ie_primary"), secondary_interests: v("ie_secondary"), buzzwords_to_use: v("ie_buzz_use"), buzzwords_to_avoid: v("ie_buzz_avoid") },
         content_approach: { marketing_style: v("ca_style"), call_to_action: v("ca_cta"), target_audience: v("ca_audience"), value_proposition: v("ca_value") },
         brand_voice_examples: { excitement: v("bv_ex"), curiosity: v("bv_cu"), authority: v("bv_au"), encouragement: v("bv_en") },
@@ -500,8 +498,6 @@
 
     setIf("cs_style", comms.writing_style || "");
     setIf("cs_humor", comms.humor_level || "");
-    setIf("cs_emoji", comms.emoji_usage || "");
-    setIf("cs_hash", comms.hashtag_strategy || "");
 
     setIf("ie_primary", ie.primary_focus || "");
     setIf("ie_secondary", ie.secondary_interests || "");
@@ -697,9 +693,7 @@
         flashButton(deleteBtn, 'success');
         const redirectUrl = new URL('dashboard.html', window.location.href);
         redirectUrl.searchParams.set('username', state.username);
-        setTimeout(() => {
-          window.location.href = redirectUrl.toString();
-        }, 900);
+        window.location.href = redirectUrl.toString();
       } else {
         showToast({
           title: `Unable to delete ${state.botName}`,

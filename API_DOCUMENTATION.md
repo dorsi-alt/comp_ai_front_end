@@ -141,8 +141,8 @@ Create or update a Twitter bot persona and scheduling settings. Twitter access t
     "communication_style": {
       "writing_style": "Clear and concise",
       "humor_level": "Light",
-      "emoji_usage": "Moderate",
-      "hashtag_strategy": "2-3 relevant hashtags"
+      "emoji_usage": "None",
+      "hashtag_strategy": "Avoid hashtags"
     },
     "interests_and_expertise": {
       "primary_focus": "Digital Marketing",
@@ -157,7 +157,7 @@ Create or update a Twitter bot persona and scheduling settings. Twitter access t
       "value_proposition": "Actionable insights"
     },
     "brand_voice_examples": {
-      "excitement": "🚀 Ready to grow?",
+      "excitement": "Ready to grow?",
       "curiosity": "What if there was a better way?",
       "authority": "Here's what works:",
       "encouragement": "You've got this!"
@@ -171,7 +171,7 @@ Create or update a Twitter bot persona and scheduling settings. Twitter access t
     "custom_instructions": [
       "Always provide actionable advice",
       "Keep tone positive and motivating",
-      "Include relevant hashtags"
+      "Never include emojis or hashtags"
     ]
   },
   "post_schedule": "hourly",
@@ -279,7 +279,7 @@ Activate a bot - posts immediately then follows schedule.
 ```json
 {
   "message": "Bot my_marketing_bot started",
-  "immediate_post": "🚀 Ready to transform your digital marketing strategy? Here's what actually works...",
+  "immediate_post": "Ready to transform your digital marketing strategy? Here's what actually works...",
   "schedule": {
     "posts": "hourly",
     "replies": "hourly"

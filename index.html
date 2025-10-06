@@ -47,7 +47,7 @@
             </nav>
 
             <div class="contact-link">
-                <button type="button" class="contact-badge">CONNECT WALLET</button>
+                <button type="button" id="connectWalletButton" class="contact-badge">CONNECT WALLET</button>
             </div>
         </div>
     </header>
@@ -436,7 +436,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const connectBtn = document.querySelector(".contact-badge"); // “CONNECT WALLET” button in header
+    const connectBtn = document.getElementById("connectWalletButton") || document.querySelector(".contact-badge"); // “CONNECT WALLET” button in header
     const modal = $("#walletModal");
     const closeBtn = $("#walletClose");
     const form = $("#walletForm");
@@ -512,6 +512,10 @@
         // Show success message based on whether wallet existed or was created
         const statusText = result.existed ? "Welcome back!" : "Account created!";
         feedback.innerHTML = `<div class="feedback-message" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e;">${statusText} ${result.message}</div>`;
+
+        if (connectBtn) {
+          connectBtn.textContent = "CONNECTED";
+        }
         
         // Update button to show success briefly
         showLoading(submit, true, "Redirecting...");

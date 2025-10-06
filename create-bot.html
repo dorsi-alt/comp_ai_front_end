@@ -225,8 +225,6 @@
           <div class="form-grid">
             <div><label>Writing Style</label><input id="cs_style" class="input" placeholder="Clear and concise" /></div>
             <div><label>Humor Level</label><input id="cs_humor" class="input" placeholder="Light" /></div>
-            <div><label>Emoji Usage</label><input id="cs_emoji" class="input" placeholder="Moderate" /></div>
-            <div><label>Hashtag Strategy</label><input id="cs_hash" class="input" placeholder="2-3 relevant hashtags" /></div>
           </div>
         </div>
 
@@ -253,7 +251,7 @@
         <div class="glass-card">
           <h3>Persona — Brand Voice Examples</h3>
           <div class="form-grid">
-            <div><label>Excitement</label><input id="bv_ex" class="input" placeholder="🚀 Ready to grow?" /></div>
+            <div><label>Excitement</label><input id="bv_ex" class="input" placeholder="Ready to grow?" /></div>
             <div><label>Curiosity</label><input id="bv_cu" class="input" placeholder="What if there was a better way?" /></div>
             <div><label>Authority</label><input id="bv_au" class="input" placeholder="Here's what works:" /></div>
             <div><label>Encouragement</label><input id="bv_en" class="input" placeholder="You've got this!" /></div>
@@ -275,7 +273,7 @@
           <label>One instruction per line</label>
           <textarea id="custom_instructions" class="textarea" placeholder="Always provide actionable advice
 Keep tone positive and motivating
-Include relevant hashtags"></textarea>
+Avoid hashtags and emojis"></textarea>
         </div> -->
 
         <!-- Twitter Connection & Bot Creation -->
@@ -420,7 +418,7 @@ Include relevant hashtags"></textarea>
     const requiredInputs = [
       $("username"), $("botName"),
       $("p_name"), $("p_role"), $("p_tone"), $("p_voice"),
-      $("cs_style"), $("cs_humor"), $("cs_emoji"), $("cs_hash"),
+      $("cs_style"), $("cs_humor"),
       $("ie_primary"), $("ie_secondary"), $("ie_buzz_use"), $("ie_buzz_avoid"),
       $("ca_style"), $("ca_cta"), $("ca_audience"), $("ca_value"),
       $("bv_ex"), $("bv_cu"), $("bv_au"), $("bv_en"),
@@ -491,8 +489,8 @@ Include relevant hashtags"></textarea>
         communication_style: {
           writing_style: $("cs_style")?.value?.trim(),
           humor_level: $("cs_humor")?.value?.trim(),
-          emoji_usage: $("cs_emoji")?.value?.trim(),
-          hashtag_strategy: $("cs_hash")?.value?.trim()
+          emoji_usage: "None",
+          hashtag_strategy: "Avoid hashtags"
         },
         interests_and_expertise: {
           primary_focus: $("ie_primary")?.value?.trim(),
@@ -547,8 +545,6 @@ Include relevant hashtags"></textarea>
       const communication = persona.communication_style || {};
       setValue("cs_style", communication.writing_style);
       setValue("cs_humor", communication.humor_level);
-      setValue("cs_emoji", communication.emoji_usage);
-      setValue("cs_hash", communication.hashtag_strategy);
 
       const interests = persona.interests_and_expertise || {};
       setValue("ie_primary", interests.primary_focus);
@@ -646,8 +642,6 @@ Include relevant hashtags"></textarea>
     // Persona — Communication Style
     if ($("cs_style")) $("cs_style").value = "Clear and concise";
     if ($("cs_humor")) $("cs_humor").value = "Light";
-    if ($("cs_emoji")) $("cs_emoji").value = "Moderate";
-    if ($("cs_hash")) $("cs_hash").value = "2-3 relevant hashtags";
 
     // Persona — Interests & Expertise
     if ($("ie_primary")) $("ie_primary").value = "Digital Marketing";
@@ -662,7 +656,7 @@ Include relevant hashtags"></textarea>
     if ($("ca_value")) $("ca_value").value = "Actionable insights";
 
     // Persona — Brand Voice Examples
-    if ($("bv_ex")) $("bv_ex").value = "🚀 Ready to grow?";
+    if ($("bv_ex")) $("bv_ex").value = "Ready to grow?";
     if ($("bv_cu")) $("bv_cu").value = "What if there was a better way?";
     if ($("bv_au")) $("bv_au").value = "Here's what works:";
     if ($("bv_en")) $("bv_en").value = "You've got this!";
@@ -677,7 +671,7 @@ Include relevant hashtags"></textarea>
     if ($("custom_instructions")) {
       $("custom_instructions").value = `Always provide actionable advice
 Keep tone positive and motivating
-Include relevant hashtags`;
+Do not use hashtags or emojis`;
     }
 
     if (preview) preview.textContent = P(buildPayload());
